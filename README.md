@@ -23,7 +23,7 @@ mvn clean install -DskipTests
 	<dependency>
 		<groupId>com.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.1.3-SNAPSHOT</version>
+		<version>0.1.6-SNAPSHOT</version>
 	</dependency>
 ```
 
