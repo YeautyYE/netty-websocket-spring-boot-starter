@@ -14,7 +14,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 - clone source and install to Maven repository
 
 ```
-mvn clean install -DskipTests
+mvn clean install
 ```
 
 - add Dependencies:

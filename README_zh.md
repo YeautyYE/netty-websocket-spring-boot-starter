@@ -14,7 +14,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 - clone本项目到本地，并安装到本地Maven仓库
 
 ```
-mvn clean install -DskipTests
+mvn clean install
 ```
 
 - 添加依赖:
