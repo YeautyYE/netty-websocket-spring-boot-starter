@@ -84,7 +84,7 @@ public class MyWebSocket {
 ###### @ServerEndpoint 
 > declaring `ServerEndpointExporter` in Spring configuration,it will scan for WebSocket endpoints that annotated with `ServerEndpoint` .
 > beans that be annotated with `ServerEndpoint` will be registered as a WebSocket endpoint.
-> all [configurations](#Configuration) are inside this annotation ( e.g. `@ServerEndpoint("/ws")` )
+> all [configurations](#https://github.com/YeautyYE/netty-websocket-spring-boot-starter#configuration) are inside this annotation ( e.g. `@ServerEndpoint("/ws")` )
 
 ###### @OnOpen 
 > when there is a WebSocket connection accepted,the method annotated with `@OnOpen` will be called  
@@ -113,13 +113,13 @@ public class MyWebSocket {
 |---|---|---
 |path|"/"|path of WebSocket can be aliased for `value`
 |host|"0.0.0.0"|host of WebSocket.`"0.0.0.0"` means all of local addresses
-|port|80|port of WebSocket。if the port equals to 0，it will use a random and available port(to get the port [Multi Endpoint](#Multi Endpoint))
+|port|80|port of WebSocket。if the port equals to 0，it will use a random and available port(to get the port [Multi-Endpoint](#https://github.com/YeautyYE/netty-websocket-spring-boot-starter#multi-endpoint))
 |tcpNodelay|true|the same as `ChannelOption.TCP_NODELAY` in Netty
 |backlog|1024|the same as `ChannelOption.SO_BACKLOG` in Netty
 
 
 ### Multi Endpoint
-- base on [Quick Start](#Quick Start),use annotation `@ServerEndpoint` and `@Component` in classes which hope to become a endpoint.
+- base on [Quick-Start](#https://github.com/YeautyYE/netty-websocket-spring-boot-starter#quick-start),use annotation `@ServerEndpoint` and `@Component` in classes which hope to become a endpoint.
 - you can get all socket addresses in `ServerEndpointExporter.getInetSocketAddressSet()`.
 - when there are different addresses(different host or different port) in WebSocket,they will use different `ServerBootstrap` instance.
 - when the addresses are the same,but path is different,they will use the same `ServerBootstrap` instance.

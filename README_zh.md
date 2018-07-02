@@ -84,7 +84,7 @@ public class MyWebSocket {
 ###### @ServerEndpoint 
 > 当ServerEndpointExporter类通过Spring配置进行声明并被使用，它将会去扫描带有@ServerEndpoint注解的类
 > 被注解的类将被注册成为一个WebSocket端点
-> 所有的[配置项](#配置)都在这个注解的属性中 ( 如:`@ServerEndpoint("/ws")` )
+> 所有的[配置项](#https://github.com/YeautyYE/netty-websocket-spring-boot-starter/blob/master/README_zh.md#%E9%85%8D%E7%BD%AE)都在这个注解的属性中 ( 如:`@ServerEndpoint("/ws")` )
 
 ###### @OnOpen 
 > 当有新的WebSocket连接进入时，对该方法进行回调
@@ -113,13 +113,13 @@ public class MyWebSocket {
 |---|---|---
 |path|"/"|WebSocket的path,也可以用`value`来设置
 |host|"0.0.0.0"|WebSocket的host,`"0.0.0.0"`即是所有本地地址
-|port|80|WebSocket绑定端口号。如果为0，则使用随机端口(端口获取可见 [多端点服务](#多端点服务))
+|port|80|WebSocket绑定端口号。如果为0，则使用随机端口(端口获取可见 [多端点服务](#https://github.com/YeautyYE/netty-websocket-spring-boot-starter/blob/master/README_zh.md#%E5%A4%9A%E7%AB%AF%E7%82%B9%E6%9C%8D%E5%8A%A1))
 |tcpNodelay|true|与Netty的`ChannelOption.TCP_NODELAY`一致
 |backlog|1024|与Netty的`ChannelOption.SO_BACKLOG`一致
 
 
 ### 多端点服务
-- 在[快速启动](#快速启动)的基础上，在多个需要成为端点的类上使用`@ServerEndpoint`、`@Component`注解即可
+- 在[快速启动](#https://github.com/YeautyYE/netty-websocket-spring-boot-starter/blob/master/README_zh.md#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)的基础上，在多个需要成为端点的类上使用`@ServerEndpoint`、`@Component`注解即可
 - 可通过`ServerEndpointExporter.getInetSocketAddressSet()`获取所有端点的地址
 - 当地址不同时(即host不同或port不同)，使用不同的`ServerBootstrap`实例
 - 当地址相同,路径(path)不同时,使用同一个`ServerBootstrap`实例
