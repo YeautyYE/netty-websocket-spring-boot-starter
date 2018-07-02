@@ -84,7 +84,7 @@ public class MyWebSocket {
 ###### @ServerEndpoint 
 > declaring `ServerEndpointExporter` in Spring configuration,it will scan for WebSocket endpoints that annotated with `ServerEndpoint` .
 > beans that be annotated with `ServerEndpoint` will be registered as a WebSocket endpoint.
-> all [configurations](#https://github.com/YeautyYE/netty-websocket-spring-boot-starter#configuration) are inside this annotation ( e.g. `@ServerEndpoint("/ws")` )
+> all [configurations](###Configuration) are inside this annotation ( e.g. `@ServerEndpoint("/ws")` )
 
 ###### @OnOpen 
 > when there is a WebSocket connection accepted,the method annotated with `@OnOpen` will be called  
