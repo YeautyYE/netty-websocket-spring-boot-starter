@@ -95,7 +95,6 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         if (res.status().code() != 200) {
             ByteBuf buf = Unpooled.copiedBuffer(res.status().toString(), CharsetUtil.UTF_8);
             res.content().writeBytes(buf);
-            buf.release();
             HttpUtil.setContentLength(res, res.content().readableBytes());
         }
 
@@ -106,23 +105,23 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
-        if (frame instanceof CloseWebSocketFrame) {
-            handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+        if (frame instanceof TextWebSocketFrame) {
+            pojoEndpointServer.doOnMessage(ctx, frame);
             return;
         }
         if (frame instanceof PingWebSocketFrame) {
             ctx.channel().writeAndFlush(new PongWebSocketFrame(frame.content().retain()));
             return;
         }
-        if (frame instanceof PongWebSocketFrame) {
-            return;
-        }
-        if (frame instanceof TextWebSocketFrame) {
-            pojoEndpointServer.doOnMessage(ctx, frame);
+        if (frame instanceof CloseWebSocketFrame) {
+            handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
             return;
         }
         if (frame instanceof BinaryWebSocketFrame) {
             pojoEndpointServer.doOnBinary(ctx, frame);
+            return;
+        }
+        if (frame instanceof PongWebSocketFrame) {
             return;
         }
     }

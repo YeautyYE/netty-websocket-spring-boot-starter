@@ -5,12 +5,15 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -34,15 +37,14 @@ public class WebsocketServer {
     }
 
     public void init() throws InterruptedException {
-        NioEventLoopGroup boss = new NioEventLoopGroup();
-        NioEventLoopGroup worker = new NioEventLoopGroup();
-
+        EventLoopGroup boss = new NioEventLoopGroup();
+        EventLoopGroup worker = new NioEventLoopGroup();
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, config.getSoBacklog())
                 .childOption(ChannelOption.TCP_NODELAY, config.getTcpNodelay())
-//                .handler(new LoggingHandler(LogLevel.ERROR))
+                .handler(new LoggingHandler(LogLevel.ERROR))
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel ch) throws Exception {
@@ -68,10 +70,10 @@ public class WebsocketServer {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 if (boss != null) {
-                    boss.shutdownGracefully();
+                    boss.shutdownGracefully().syncUninterruptibly();
                 }
                 if (worker != null) {
-                    worker.shutdownGracefully();
+                    worker.shutdownGracefully().syncUninterruptibly();
                 }
             }
         }));

@@ -32,23 +32,17 @@ public class Session {
     }
 
     public ChannelFuture send(ByteBuf byteBuf) {
-        ChannelFuture channelFuture = channel.writeAndFlush(new BinaryWebSocketFrame(byteBuf.retain()));
-        channelFuture.addListener(future -> byteBuf.release());
-        return channelFuture;
+        return channel.writeAndFlush(new BinaryWebSocketFrame(byteBuf));
     }
 
     public ChannelFuture send(ByteBuffer byteBuffer) {
         ByteBuf buffer = channel.alloc().buffer(byteBuffer.remaining());
-        ChannelFuture channelFuture = channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(byteBuffer).retain()));
-        channelFuture.addListener(future -> buffer.release());
-        return channelFuture;
+        return channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(byteBuffer)));
     }
 
     public ChannelFuture send(byte[] bytes) {
         ByteBuf buffer = channel.alloc().buffer(bytes.length);
-        ChannelFuture channelFuture = channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(bytes).retain()));
-        channelFuture.addListener(future -> buffer.release());
-        return channelFuture;
+        return channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(bytes)));
     }
 
     public Channel channel() {
@@ -198,6 +192,5 @@ public class Session {
     public ChannelFuture close(ChannelPromise promise) {
         return channel.close(promise);
     }
-
 
 }

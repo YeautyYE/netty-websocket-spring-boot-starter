@@ -26,11 +26,11 @@ import java.util.Set;
  */
 public class PojoEndpointServer {
 
-    private final static AttributeKey POJO_KEY = AttributeKey.valueOf("WEBSOCKET_IMPLEMENT");
+    private static final AttributeKey POJO_KEY = AttributeKey.valueOf("WEBSOCKET_IMPLEMENT");
 
-    private final static AttributeKey<Session> SESSION_KEY = AttributeKey.valueOf("WEBSOCKET_SESSION");
+    private static final AttributeKey<Session> SESSION_KEY = AttributeKey.valueOf("WEBSOCKET_SESSION");
 
-    private final static AttributeKey<String> PATH_KEY = AttributeKey.valueOf("WEBSOCKET_PATH");
+    private static final AttributeKey<String> PATH_KEY = AttributeKey.valueOf("WEBSOCKET_PATH");
 
     private final Map<String, PojoMethodMapping> pathMethodMappingMap = new HashMap<>();
 
