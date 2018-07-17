@@ -27,22 +27,31 @@ public class Session {
         this.channel = channel;
     }
 
-    public ChannelFuture send(String message) {
+    public ChannelFuture sendText(String message){
         return channel.writeAndFlush(new TextWebSocketFrame(message));
     }
 
-    public ChannelFuture send(ByteBuf byteBuf) {
+    public ChannelFuture sendText(ByteBuf byteBuf){
+        return channel.writeAndFlush(new TextWebSocketFrame(byteBuf));
+    }
+
+    public ChannelFuture sendText(ByteBuffer byteBuffer){
+        ByteBuf buffer = channel.alloc().buffer(byteBuffer.remaining());
+        return channel.writeAndFlush(new TextWebSocketFrame(buffer));
+    }
+
+    public ChannelFuture sendBinary(byte[] bytes){
+        ByteBuf buffer = channel.alloc().buffer(bytes.length);
+        return channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(bytes)));
+    }
+
+    public ChannelFuture sendBinary(ByteBuf byteBuf){
         return channel.writeAndFlush(new BinaryWebSocketFrame(byteBuf));
     }
 
-    public ChannelFuture send(ByteBuffer byteBuffer) {
+    public ChannelFuture sendBinary(ByteBuffer byteBuffer){
         ByteBuf buffer = channel.alloc().buffer(byteBuffer.remaining());
-        return channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(byteBuffer)));
-    }
-
-    public ChannelFuture send(byte[] bytes) {
-        ByteBuf buffer = channel.alloc().buffer(bytes.length);
-        return channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(bytes)));
+        return channel.writeAndFlush(new BinaryWebSocketFrame(buffer));
     }
 
     public Channel channel() {
