@@ -69,7 +69,7 @@ public class MyWebSocket {
 
     @OnBinary
     public void OnBinary(Session session, byte[] bytes) {
-       for (byte b : bytes) {
+        for (byte b : bytes) {
             System.out.println(b);
         }
         session.sendBinary(bytes); 
