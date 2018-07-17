@@ -64,7 +64,7 @@ public class MyWebSocket {
     @OnMessage
     public void OnMessage(Session session, String message) {
         System.out.println(text);
-		session.send("Hello Netty!");
+		session.sendText("Hello Netty!");
     }
 
     @OnBinary
@@ -72,7 +72,7 @@ public class MyWebSocket {
        for (byte b : bytes) {
             System.out.println(b);
         }
-		session.send(bytes); 
+		session.sendBinary(bytes); 
     }
 }
 ```
