@@ -40,6 +40,10 @@ public class Session {
         return channel.writeAndFlush(new TextWebSocketFrame(buffer));
     }
 
+    public ChannelFuture sendText(TextWebSocketFrame textWebSocketFrame){
+        return channel.writeAndFlush(textWebSocketFrame);
+    }
+
     public ChannelFuture sendBinary(byte[] bytes){
         ByteBuf buffer = channel.alloc().buffer(bytes.length);
         return channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(bytes)));
@@ -52,6 +56,9 @@ public class Session {
     public ChannelFuture sendBinary(ByteBuffer byteBuffer){
         ByteBuf buffer = channel.alloc().buffer(byteBuffer.remaining());
         return channel.writeAndFlush(new BinaryWebSocketFrame(buffer));
+    }
+    public ChannelFuture sendBinary(BinaryWebSocketFrame binaryWebSocketFrame){
+        return channel.writeAndFlush(binaryWebSocketFrame);
     }
 
     public Channel channel() {
