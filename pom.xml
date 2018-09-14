@@ -6,7 +6,7 @@
 
     <groupId>com.yeauty</groupId>
     <artifactId>netty-websocket-spring-boot-starter</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.3.2-SNAPSHOT</version>
 
     <properties>
         <netty.version>4.1.25.Final</netty.version>
@@ -18,7 +18,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring-boot.version}</version>
-            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

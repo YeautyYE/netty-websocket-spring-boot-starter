@@ -2,16 +2,12 @@ package com.yeauty.standard;
 
 import com.yeauty.pojo.PojoEndpointServer;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -42,40 +38,47 @@ public class WebsocketServer {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,config.getConnectTimeoutMillis())
                 .option(ChannelOption.SO_BACKLOG, config.getSoBacklog())
-                .childOption(ChannelOption.TCP_NODELAY, config.getTcpNodelay())
-                .handler(new LoggingHandler(LogLevel.ERROR))
+                .childOption(ChannelOption.WRITE_SPIN_COUNT,config.getWriteSpinCount())
+                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,new WriteBufferWaterMark(config.getWriteBufferLowWaterMark(),config.getWriteBufferHighWaterMark()))
+                .childOption(ChannelOption.TCP_NODELAY,config.isTcpNodelay())
+                .childOption(ChannelOption.SO_KEEPALIVE,config.isSoKeepalive())
+                .childOption(ChannelOption.SO_LINGER,config.getSoLinger())
+                .childOption(ChannelOption.ALLOW_HALF_CLOSURE,config.isAllowHalfClosure())
+                .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast(new HttpServerCodec());
                         pipeline.addLast(new HttpObjectAggregator(65536));
-                        pipeline.addLast(new WebSocketServerCompressionHandler());
-                        pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
+                        pipeline.addLast(new HttpServerHandler(pojoEndpointServer));
                     }
                 });
 
+        if(config.getSoRcvbuf()!=-1){
+            bootstrap.childOption(ChannelOption.SO_RCVBUF,config.getSoRcvbuf());
+        }
+
+        if (config.getSoSndbuf()!=-1){
+            bootstrap.childOption(ChannelOption.SO_SNDBUF,config.getSoSndbuf());
+        }
+
         if ("0.0.0.0".equals(config.getHost())) {
-            bootstrap.bind(config.getPort()).sync().channel();
+            bootstrap.bind(config.getPort());
         } else {
             try {
-                bootstrap.bind(new InetSocketAddress(InetAddress.getByName(config.getHost()), config.getPort())).sync().channel();
+                bootstrap.bind(new InetSocketAddress(InetAddress.getByName(config.getHost()), config.getPort()));
             } catch (UnknownHostException e) {
                 bootstrap.bind(config.getHost(), config.getPort());
                 e.printStackTrace();
             }
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            public void run() {
-                if (boss != null) {
-                    boss.shutdownGracefully().syncUninterruptibly();
-                }
-                if (worker != null) {
-                    worker.shutdownGracefully().syncUninterruptibly();
-                }
-            }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            boss.shutdownGracefully().syncUninterruptibly();
+            worker.shutdownGracefully().syncUninterruptibly();
         }));
     }
 

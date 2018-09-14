@@ -114,8 +114,17 @@ public class MyWebSocket {
 |path|"/"|WebSocket的path,也可以用`value`来设置
 |host|"0.0.0.0"|WebSocket的host,`"0.0.0.0"`即是所有本地地址
 |port|80|WebSocket绑定端口号。如果为0，则使用随机端口(端口获取可见 [多端点服务](#%E5%A4%9A%E7%AB%AF%E7%82%B9%E6%9C%8D%E5%8A%A1))
-|tcpNodelay|true|与Netty的`ChannelOption.TCP_NODELAY`一致
-|backlog|1024|与Netty的`ChannelOption.SO_BACKLOG`一致
+|optionConnectTimeoutMillis|30000|与Netty的`ChannelOption.CONNECT_TIMEOUT_MILLIS`一致
+|optionSoBacklog|128|与Netty的`ChannelOption.SO_BACKLOG`一致
+|childOptionWriteSpinCount|16|与Netty的`ChannelOption.WRITE_SPIN_COUNT`一致
+|childOptionWriteBufferHighWaterMark|64*1024|与Netty的`ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK`一致,但实际上是使用`ChannelOption.WRITE_BUFFER_WATER_MARK`
+|childOptionWriteBufferLowWaterMark|32*1024|与Netty的`ChannelOption.WRITE_BUFFER_LOW_WATER_MARK`一致,但实际上是使用 `ChannelOption.WRITE_BUFFER_WATER_MARK`
+|childOptionSoRcvbuf|-1(即未设置)|与Netty的`ChannelOption.SO_RCVBUF`一致
+|childOptionSoSndbuf|-1(即未设置)|与Netty的`ChannelOption.SO_SNDBUF`一致
+|childOptionTcpNodelay|true|与Netty的`ChannelOption.TCP_NODELAY`一致
+|childOptionSoKeepalive|false|与Netty的`ChannelOption.SO_KEEPALIVE`一致
+|childOptionSoLinger|-1|与Netty的`ChannelOption.SO_LINGER`一致
+|childOptionAllowHalfClosure|false|与Netty的`ChannelOption.ALLOW_HALF_CLOSURE`一致
 
 
 ### 多端点服务

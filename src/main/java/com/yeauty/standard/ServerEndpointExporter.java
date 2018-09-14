@@ -64,13 +64,11 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             throw new RuntimeException("missingAnnotation ServerEndpoint");
         }
         String path = annotation.value();
-        String host = annotation.host();
-        int port = annotation.port();
-        boolean tcpNodelay = annotation.tcpNodelay();
-        int backlog = annotation.backlog();
+        ServerEndpointConfig serverEndpointConfig = buildConfig(annotation);
+
         ApplicationContext context = getApplicationContext();
         PojoMethodMapping pojoMethodMapping = new PojoMethodMapping(endpointClass, context);
-        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, tcpNodelay, backlog);
+
         InetSocketAddress inetSocketAddress = new InetSocketAddress(serverEndpointConfig.getHost(), serverEndpointConfig.getPort());
         WebsocketServer websocketServer = addressWebsocketServerMap.get(inetSocketAddress);
         if (websocketServer == null) {
@@ -83,6 +81,26 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         }
     }
 
+    private ServerEndpointConfig buildConfig(ServerEndpoint annotation) {
+        String host = annotation.host();
+        int port = annotation.port();
+        String path = annotation.value();
+
+        int optionConnectTimeoutMillis = annotation.optionConnectTimeoutMillis();
+        int optionSoBacklog = annotation.optionSoBacklog();
+
+        int childOptionWriteSpinCount = annotation.childOptionWriteSpinCount();
+        int childOptionWriteBufferHighWaterMark = annotation.childOptionWriteBufferHighWaterMark();
+        int childOptionWriteBufferLowWaterMark = annotation.childOptionWriteBufferLowWaterMark();
+        int childOptionSoRcvbuf = annotation.childOptionSoRcvbuf();
+        int childOptionSoSndbuf = annotation.childOptionSoSndbuf();
+        boolean childOptionTcpNodelay = annotation.childOptionTcpNodelay();
+        boolean childOptionSoKeepalive = annotation.childOptionSoKeepalive();
+        int childOptionSoLinger = annotation.childOptionSoLinger();
+        boolean childOptionAllowHalfClosure = annotation.childOptionAllowHalfClosure();
+        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, optionConnectTimeoutMillis, optionSoBacklog,childOptionWriteSpinCount,childOptionWriteBufferHighWaterMark,childOptionWriteBufferLowWaterMark,childOptionSoRcvbuf,childOptionSoSndbuf,childOptionTcpNodelay,childOptionSoKeepalive,childOptionSoLinger,childOptionAllowHalfClosure);
+        return serverEndpointConfig;
+    }
 
     public Set<InetSocketAddress> getInetSocketAddressSet() {
         return addressWebsocketServerMap.keySet();

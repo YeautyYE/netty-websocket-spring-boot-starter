@@ -114,8 +114,17 @@ public class MyWebSocket {
 |path|"/"|path of WebSocket can be aliased for `value`
 |host|"0.0.0.0"|host of WebSocket.`"0.0.0.0"` means all of local addresses
 |port|80|port of WebSocket。if the port equals to 0，it will use a random and available port(to get the port [Multi-Endpoint](#multi-endpoint))
-|tcpNodelay|true|the same as `ChannelOption.TCP_NODELAY` in Netty
-|backlog|1024|the same as `ChannelOption.SO_BACKLOG` in Netty
+|optionConnectTimeoutMillis|30000|the same as `ChannelOption.CONNECT_TIMEOUT_MILLIS` in Netty
+|optionSoBacklog|128|the same as `ChannelOption.SO_BACKLOG` in Netty
+|childOptionWriteSpinCount|16|the same as `ChannelOption.WRITE_SPIN_COUNT` in Netty
+|childOptionWriteBufferHighWaterMark|64*1024|the same as `ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK` in Netty,but use `ChannelOption.WRITE_BUFFER_WATER_MARK` in fact.
+|childOptionWriteBufferLowWaterMark|32*1024|the same as `ChannelOption.WRITE_BUFFER_LOW_WATER_MARK` in Netty,but use `ChannelOption.WRITE_BUFFER_WATER_MARK` in fact.
+|childOptionSoRcvbuf|-1(mean not set)|the same as `ChannelOption.SO_RCVBUF` in Netty
+|childOptionSoSndbuf|-1(mean not set)|the same as `ChannelOption.SO_SNDBUF` in Netty
+|childOptionTcpNodelay|true|the same as `ChannelOption.TCP_NODELAY` in Netty
+|childOptionSoKeepalive|false|the same as `ChannelOption.SO_KEEPALIVE` in Netty
+|childOptionSoLinger|-1|the same as `ChannelOption.SO_LINGER` in Netty
+|childOptionAllowHalfClosure|false|the same as `ChannelOption.ALLOW_HALF_CLOSURE` in Netty
 
 
 ### Multi Endpoint

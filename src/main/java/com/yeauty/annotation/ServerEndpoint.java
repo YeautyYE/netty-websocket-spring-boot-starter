@@ -27,7 +27,30 @@ public @interface ServerEndpoint {
 
     int port() default 80;
 
-    boolean tcpNodelay() default true;
+    //------------------------- option -------------------------
 
-    int backlog() default 1024;
+    int optionConnectTimeoutMillis() default 30000;
+
+    int optionSoBacklog() default 128;
+
+    //------------------------- childOption -------------------------
+
+    int childOptionWriteSpinCount() default 16;
+
+    int childOptionWriteBufferHighWaterMark() default 64 * 1024;
+
+    int childOptionWriteBufferLowWaterMark() default 32 * 1024;
+
+    int childOptionSoRcvbuf() default -1;
+
+    int childOptionSoSndbuf() default -1;
+
+    boolean childOptionTcpNodelay() default true;
+
+    boolean childOptionSoKeepalive() default false;
+
+    int childOptionSoLinger() default -1;
+
+    boolean childOptionAllowHalfClosure() default false;
+
 }
