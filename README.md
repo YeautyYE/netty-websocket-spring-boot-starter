@@ -126,6 +126,32 @@ public class MyWebSocket {
 |childOptionSoLinger|-1|the same as `ChannelOption.SO_LINGER` in Netty
 |childOptionAllowHalfClosure|false|the same as `ChannelOption.ALLOW_HALF_CLOSURE` in Netty
 
+### Custom Favicon
+The way of configure favicon is the same as spring-boot.If favicon.ico is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:
+```
+src/
+  +- main/
+    +- java/
+    |   + <source code>
+    +- resources/
+        +- favicon.ico
+```
+
+### Custom Error Pages
+The way of configure favicon is the same as spring-boot.you can add a file to an `/public/error`
+folder.The name of the error page should be the exact status code or a series mask.the example is following:
+```
+src/
+  +- main/
+    +- java/
+    |   + <source code>
+    +- resources/
+        +- public/
+            +- error/
+            |   +- 404.html
+            |   +- 5xx.html
+            +- <other public assets>
+```  
 
 ### Multi Endpoint
 - base on [Quick-Start](#quick-start),use annotation `@ServerEndpoint` and `@Component` in classes which hope to become a endpoint.

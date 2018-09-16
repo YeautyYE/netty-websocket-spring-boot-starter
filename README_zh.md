@@ -126,6 +126,31 @@ public class MyWebSocket {
 |childOptionSoLinger|-1|与Netty的`ChannelOption.SO_LINGER`一致
 |childOptionAllowHalfClosure|false|与Netty的`ChannelOption.ALLOW_HALF_CLOSURE`一致
 
+### 自定义Favicon
+配置favicon的方式与spring-boot中完全一致。只需将`favicon.ico`文件放到classpath的根目录下即可。如下:
+```
+src/
+  +- main/
+    +- java/
+    |   + <source code>
+    +- resources/
+        +- favicon.ico
+```
+
+### 自定义错误页面
+配置自定义错误页面的方式与spring-boot中完全一致。你可以添加一个 `/public/error` 目录，错误页面将会是该目录下的静态页面，错误页面的文件名必须是准确的错误状态或者是一串掩码,如下：
+```
+src/
+  +- main/
+    +- java/
+    |   + <source code>
+    +- resources/
+        +- public/
+            +- error/
+            |   +- 404.html
+            |   +- 5xx.html
+            +- <other public assets>
+```  
 
 ### 多端点服务
 - 在[快速启动](#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)的基础上，在多个需要成为端点的类上使用`@ServerEndpoint`、`@Component`注解即可
