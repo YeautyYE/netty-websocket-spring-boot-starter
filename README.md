@@ -127,14 +127,14 @@ public class MyWebSocket {
 |childOptionAllowHalfClosure|false|the same as `ChannelOption.ALLOW_HALF_CLOSURE` in Netty
 
 ### Custom Favicon
-The way of configure favicon is the same as spring-boot.If favicon.ico is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:
+The way of configure favicon is the same as spring-boot.If `favicon.ico` is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:
 ```
 src/
   +- main/
-    +- java/
-    |   + <source code>
-    +- resources/
-        +- favicon.ico
+      +- java/
+      |   + <source code>
+      +- resources/
+          +- favicon.ico
 ```
 
 ### Custom Error Pages
@@ -143,14 +143,14 @@ folder.The name of the error page should be the exact status code or a series ma
 ```
 src/
   +- main/
-    +- java/
-    |   + <source code>
-    +- resources/
-        +- public/
-            +- error/
-            |   +- 404.html
-            |   +- 5xx.html
-            +- <other public assets>
+      +- java/
+      |   + <source code>
+      +- resources/
+          +- public/
+              +- error/
+              |   +- 404.html
+              |   +- 5xx.html
+              +- <other public assets>
 ```  
 
 ### Multi Endpoint
