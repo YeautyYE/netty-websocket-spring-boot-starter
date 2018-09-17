@@ -30,9 +30,12 @@ public class ServerEndpointConfig {
     private final boolean SO_KEEPALIVE;
     private final int SO_LINGER;
     private final boolean ALLOW_HALF_CLOSURE;
+    private final int READER_IDLE_TIME_SECONDS;
+    private final int WRITER_IDLE_TIME_SECONDS;
+    private final int ALL_IDLE_TIME_SECONDS;
     private static Integer randomPort;
 
-    public ServerEndpointConfig(String host, int port, String path, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure) {
+    public ServerEndpointConfig(String host, int port, String path, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds) {
         if (StringUtils.isEmpty(host) || "0.0.0.0".equals(host) || "0.0.0.0/0.0.0.0".equals(host)) {
             this.HOST = "0.0.0.0";
         } else {
@@ -52,6 +55,9 @@ public class ServerEndpointConfig {
         this.SO_KEEPALIVE = soKeepalive;
         this.SO_LINGER = soLinger;
         this.ALLOW_HALF_CLOSURE = allowHalfClosure;
+        this.READER_IDLE_TIME_SECONDS = readerIdleTimeSeconds;
+        this.WRITER_IDLE_TIME_SECONDS = writerIdleTimeSeconds;
+        this.ALL_IDLE_TIME_SECONDS = allIdleTimeSeconds;
     }
 
 
@@ -148,5 +154,17 @@ public class ServerEndpointConfig {
 
     public static Integer getRandomPort() {
         return randomPort;
+    }
+
+    public int getReaderIdleTimeSeconds() {
+        return READER_IDLE_TIME_SECONDS;
+    }
+
+    public int getWriterIdleTimeSeconds() {
+        return WRITER_IDLE_TIME_SECONDS;
+    }
+
+    public int getAllIdleTimeSeconds() {
+        return ALL_IDLE_TIME_SECONDS;
     }
 }

@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
 import org.springframework.util.StringUtils;
 
@@ -24,6 +25,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private final PojoEndpointServer pojoEndpointServer;
+    private final ServerEndpointConfig config;
 
     private static ByteBuf faviconByteBuf = null;
     private static ByteBuf notFoundByteBuf = null;
@@ -67,8 +69,9 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         return null;
     }
 
-    public HttpServerHandler(PojoEndpointServer pojoEndpointServer) {
+    public HttpServerHandler(PojoEndpointServer pojoEndpointServer, ServerEndpointConfig config) {
         this.pojoEndpointServer = pojoEndpointServer;
+        this.config = config;
     }
 
     @Override
@@ -172,6 +175,9 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         } else {
             ChannelPipeline pipeline = ctx.pipeline();
             pipeline.remove(ctx.name());
+            if (config.getReaderIdleTimeSeconds() != 0 || config.getWriterIdleTimeSeconds() != 0 || config.getAllIdleTimeSeconds() != 0) {
+                pipeline.addLast(new IdleStateHandler(config.getReaderIdleTimeSeconds(), config.getWriterIdleTimeSeconds(), config.getAllIdleTimeSeconds()));
+            }
             pipeline.addLast(
                     new WebSocketServerCompressionHandler(),
                     new WebSocketServerHandler(pojoEndpointServer)

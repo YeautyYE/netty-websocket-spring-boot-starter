@@ -18,11 +18,13 @@ public class PojoMethodMapping {
     private final Method onError;
     private final Method onMessage;
     private final Method onBinary;
+    private final Method onEvent;
     private final PojoPathParam[] onOpenParams;
     private final PojoPathParam[] onCloseParams;
     private final PojoPathParam[] onErrorParams;
     private final PojoPathParam[] onMessageParams;
     private final PojoPathParam[] onBinaryParams;
+    private final PojoPathParam[] onEventParams;
     private final Class pojoClazz;
     private final ApplicationContext applicationContext;
 
@@ -34,6 +36,7 @@ public class PojoMethodMapping {
         Method error = null;
         Method message = null;
         Method binary = null;
+        Method event = null;
         Method[] pojoClazzMethods = null;
         Class<?> currentClazz = pojoClazz;
         while (!currentClazz.equals(Object.class)) {
@@ -102,6 +105,18 @@ public class PojoMethodMapping {
                                     "pojoMethodMapping.duplicateAnnotation OnBinary");
                         }
                     }
+                } else if (method.getAnnotation(OnEvent.class) != null) {
+                    checkPublic(method);
+                    if (event == null) {
+                        event = method;
+                    } else {
+                        if (currentClazz == pojoClazz ||
+                                !isMethodOverride(event, method)) {
+                            // Duplicate annotation
+                            throw new RuntimeException(
+                                    "pojoMethodMapping.duplicateAnnotation OnEvent");
+                        }
+                    }
                 } else {
                     // Method not annotated
                 }
@@ -135,17 +150,24 @@ public class PojoMethodMapping {
                 binary = null;
             }
         }
+        if (event != null && event.getDeclaringClass() != pojoClazz) {
+            if (isOverridenWithoutAnnotation(pojoClazzMethods, event, OnEvent.class)) {
+                event = null;
+            }
+        }
 
         this.onOpen = open;
         this.onClose = close;
         this.onError = error;
         this.onMessage = message;
         this.onBinary = binary;
+        this.onEvent = event;
         onOpenParams = getPathParams(onOpen, MethodType.ON_OPEN);
         onCloseParams = getPathParams(onClose, MethodType.ON_CLOSE);
         onErrorParams = getPathParams(onError, MethodType.ON_ERROR);
         onMessageParams = getPathParams(onMessage, MethodType.ON_MESSAGE);
         onBinaryParams = getPathParams(onBinary, MethodType.ON_BINARY);
+        onEventParams = getPathParams(onEvent, MethodType.ON_EVENT);
     }
 
 
@@ -184,7 +206,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnOpenArgs(Session session, HttpHeaders headers) {
-        return buildArgs(onOpenParams, session, headers, null, null, null);
+        return buildArgs(onOpenParams, session, headers, null, null, null, null);
     }
 
     public Method getOnClose() {
@@ -192,7 +214,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnCloseArgs(Session session) {
-        return buildArgs(onCloseParams, session, null, null, null, null);
+        return buildArgs(onCloseParams, session, null, null, null, null, null);
     }
 
     public Method getOnError() {
@@ -200,7 +222,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnErrorArgs(Session session, Throwable throwable) {
-        return buildArgs(onErrorParams, session, null, null, null, throwable);
+        return buildArgs(onErrorParams, session, null, null, null, throwable, null);
     }
 
     public Method getOnMessage() {
@@ -208,7 +230,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnMessageArgs(Session session, String text) {
-        return buildArgs(onMessageParams, session, null, text, null, null);
+        return buildArgs(onMessageParams, session, null, text, null, null, null);
     }
 
     public Method getOnBinary() {
@@ -216,7 +238,15 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnBinaryArgs(Session session, byte[] bytes) {
-        return buildArgs(onBinaryParams, session, null, null, bytes, null);
+        return buildArgs(onBinaryParams, session, null, null, bytes, null, null);
+    }
+
+    public Method getOnEvent() {
+        return onEvent;
+    }
+
+    public Object[] getOnEventArgs(Session session, Object evt) {
+        return buildArgs(onEventParams, session, null, null, null, null, evt);
     }
 
     private static PojoPathParam[] getPathParams(Method m, MethodType methodType) throws RuntimeException {
@@ -243,6 +273,9 @@ public class PojoMethodMapping {
             } else if (methodType == MethodType.ON_BINARY &&
                     type.equals(byte[].class)) {
                 result[i] = new PojoPathParam(type, "binary");
+            } else if (methodType == MethodType.ON_EVENT &&
+                    type.equals(Object.class)) {
+                result[i] = new PojoPathParam(type, "event");
             } else {
                 if (result[i] == null) {
                     throw new RuntimeException(
@@ -259,7 +292,7 @@ public class PojoMethodMapping {
 
     private static Object[] buildArgs(PojoPathParam[] pathParams,
                                       Session session,
-                                      HttpHeaders headers, String text, byte[] bytes, Throwable throwable) {
+                                      HttpHeaders headers, String text, byte[] bytes, Throwable throwable, Object evt) {
         Object[] result = new Object[pathParams.length];
         for (int i = 0; i < pathParams.length; i++) {
             Class<?> type = pathParams[i].getType();
@@ -273,6 +306,8 @@ public class PojoMethodMapping {
                 result[i] = bytes;
             } else if (type.equals(Throwable.class)) {
                 result[i] = throwable;
+            } else if (type.equals(Object.class)) {
+                result[i] = evt;
             }
         }
         return result;
@@ -283,6 +318,7 @@ public class PojoMethodMapping {
         ON_CLOSE,
         ON_MESSAGE,
         ON_BINARY,
+        ON_EVENT,
         ON_ERROR
     }
 }

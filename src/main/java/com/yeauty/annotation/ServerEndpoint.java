@@ -53,4 +53,12 @@ public @interface ServerEndpoint {
 
     boolean childOptionAllowHalfClosure() default false;
 
+    //------------------------- idleEvent -------------------------
+
+    int readerIdleTimeSeconds() default 0;
+
+    int writerIdleTimeSeconds() default 0;
+
+    int allIdleTimeSeconds() default 0;
+
 }

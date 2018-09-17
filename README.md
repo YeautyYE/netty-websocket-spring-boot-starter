@@ -23,7 +23,7 @@ mvn clean install
 	<dependency>
 		<groupId>com.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.2.1-SNAPSHOT</version>
+		<version>0.5.2-SNAPSHOT</version>
 	</dependency>
 ```
 
@@ -74,6 +74,27 @@ public class MyWebSocket {
         }
         session.sendBinary(bytes); 
     }
+
+    @OnEvent
+    public void onEvent(Session session, Object evt) {
+        if (evt instanceof IdleStateEvent) {
+            IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+            switch (idleStateEvent.state()) {
+                case READER_IDLE:
+                    System.out.println(“read idle”);
+                    break;
+                case WRITER_IDLE:
+                    System.out.println(“write idle”);
+                    break;
+                case ALL_IDLE:
+                    System.out.println(“all idle”);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
 }
 ```
 
@@ -125,6 +146,9 @@ public class MyWebSocket {
 |childOptionSoKeepalive|false|the same as `ChannelOption.SO_KEEPALIVE` in Netty
 |childOptionSoLinger|-1|the same as `ChannelOption.SO_LINGER` in Netty
 |childOptionAllowHalfClosure|false|the same as `ChannelOption.ALLOW_HALF_CLOSURE` in Netty
+|readerIdleTimeSeconds|0|the same as `readerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
+|writerIdleTimeSeconds|0|the same as `writerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
+|allIdleTimeSeconds|0|the same as `allIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 
 ### Custom Favicon
 The way of configure favicon is the same as spring-boot.If `favicon.ico` is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:

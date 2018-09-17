@@ -27,7 +27,11 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<WebSocketFrame>
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         pojoEndpointServer.doOnClose(ctx);
-        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        pojoEndpointServer.doOnEvent(ctx, evt);
     }
 
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {

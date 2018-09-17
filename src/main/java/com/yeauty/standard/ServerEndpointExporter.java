@@ -98,7 +98,10 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         boolean childOptionSoKeepalive = annotation.childOptionSoKeepalive();
         int childOptionSoLinger = annotation.childOptionSoLinger();
         boolean childOptionAllowHalfClosure = annotation.childOptionAllowHalfClosure();
-        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, optionConnectTimeoutMillis, optionSoBacklog,childOptionWriteSpinCount,childOptionWriteBufferHighWaterMark,childOptionWriteBufferLowWaterMark,childOptionSoRcvbuf,childOptionSoSndbuf,childOptionTcpNodelay,childOptionSoKeepalive,childOptionSoLinger,childOptionAllowHalfClosure);
+        int readerIdleTimeSeconds = annotation.readerIdleTimeSeconds();
+        int writerIdleTimeSeconds = annotation.writerIdleTimeSeconds();
+        int allIdleTimeSeconds = annotation.allIdleTimeSeconds();
+        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, optionConnectTimeoutMillis, optionSoBacklog,childOptionWriteSpinCount,childOptionWriteBufferHighWaterMark,childOptionWriteBufferLowWaterMark,childOptionSoRcvbuf,childOptionSoSndbuf,childOptionTcpNodelay,childOptionSoKeepalive,childOptionSoLinger,childOptionAllowHalfClosure,readerIdleTimeSeconds,writerIdleTimeSeconds,allIdleTimeSeconds);
         return serverEndpointConfig;
     }
 

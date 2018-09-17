@@ -23,7 +23,7 @@ mvn clean install
 	<dependency>
 		<groupId>com.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.2.1-SNAPSHOT</version>
+		<version>0.5.2-SNAPSHOT</version>
 	</dependency>
 ```
 
@@ -74,6 +74,27 @@ public class MyWebSocket {
         }
         session.sendBinary(bytes); 
     }
+
+    @OnEvent
+    public void onEvent(Session session, Object evt) {
+        if (evt instanceof IdleStateEvent) {
+            IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+            switch (idleStateEvent.state()) {
+                case READER_IDLE:
+                    System.out.println(“read idle”);
+                    break;
+                case WRITER_IDLE:
+                    System.out.println(“write idle”);
+                    break;
+                case ALL_IDLE:
+                    System.out.println(“all idle”);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
 }
 ```
 
@@ -125,6 +146,9 @@ public class MyWebSocket {
 |childOptionSoKeepalive|false|与Netty的`ChannelOption.SO_KEEPALIVE`一致
 |childOptionSoLinger|-1|与Netty的`ChannelOption.SO_LINGER`一致
 |childOptionAllowHalfClosure|false|与Netty的`ChannelOption.ALLOW_HALF_CLOSURE`一致
+|readerIdleTimeSeconds|0|与`IdleStateHandler`中的`readerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
+|writerIdleTimeSeconds|0|与`IdleStateHandler`中的`writerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
+|allIdleTimeSeconds|0|与`IdleStateHandler`中的`allIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 
 ### 自定义Favicon
 配置favicon的方式与spring-boot中完全一致。只需将`favicon.ico`文件放到classpath的根目录下即可。如下:

@@ -179,6 +179,26 @@ public class PojoEndpointServer {
         }
     }
 
+    public void doOnEvent(ChannelHandlerContext ctx, Object evt) {
+        Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
+        PojoMethodMapping methodMapping = null;
+        if (pathMethodMappingMap.size() == 1) {
+            methodMapping = pathMethodMappingMap.values().iterator().next();
+        } else {
+            String path = attrPath.get();
+            methodMapping = pathMethodMappingMap.get(path);
+        }
+        if (methodMapping.getOnEvent() != null) {
+            Object implement = ctx.channel().attr(POJO_KEY).get();
+            Session session = ctx.channel().attr(SESSION_KEY).get();
+            try {
+                methodMapping.getOnEvent().invoke(implement, methodMapping.getOnEventArgs(session, evt));
+            } catch (Throwable t) {
+                logger.error(t);
+            }
+        }
+    }
+
     public String getHost() {
         return config.getHost();
     }
@@ -191,4 +211,5 @@ public class PojoEndpointServer {
         path = config.addPath(path);
         pathMethodMappingMap.put(path, pojoMethodMapping);
     }
+
 }
