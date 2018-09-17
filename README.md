@@ -8,6 +8,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 
 ### Requirement
 - jdk version 1.8 or 1.8+
+- spring-boot version 2.0.0.RELEASE or over 2.0.0.RELEASE
 
 
 ### Quick Start
@@ -23,7 +24,7 @@ mvn clean install
 	<dependency>
 		<groupId>com.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.5.2-SNAPSHOT</version>
+		<version>0.6.0-SNAPSHOT</version>
 	</dependency>
 ```
 
@@ -39,7 +40,7 @@ public class WebSocketConfig {
 }
 ```
 
-- annotate `@ServerEndpoint`、`@Component` on endpoint class，and annotate `@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary` on the method. e.g.
+- annotate `@ServerEndpoint`、`@Component` on endpoint class，and annotate `@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`OnEvent` on the method. e.g.
 
 ```java
 @ServerEndpoint
@@ -103,7 +104,8 @@ public class MyWebSocket {
 
 ### Annotation
 ###### @ServerEndpoint 
-> declaring `ServerEndpointExporter` in Spring configuration,it will scan for WebSocket endpoints that annotated with `ServerEndpoint` .
+> declaring `ServerEndpointExporter` in Spring configuration,it will scan for WebSocket endpoints that 
+> tated with `ServerEndpoint` .
 > beans that be annotated with `ServerEndpoint` will be registered as a WebSocket endpoint.
 > all [configurations](#configuration) are inside this annotation ( e.g. `@ServerEndpoint("/ws")` )
 
@@ -135,6 +137,7 @@ public class MyWebSocket {
 |path|"/"|path of WebSocket can be aliased for `value`
 |host|"0.0.0.0"|host of WebSocket.`"0.0.0.0"` means all of local addresses
 |port|80|port of WebSocket。if the port equals to 0，it will use a random and available port(to get the port [Multi-Endpoint](#multi-endpoint))
+|prefix|""|configuration by application.properties when it is empty，details can be find in [Configuration-by-application.properties](#configuration-by-application.properties)
 |optionConnectTimeoutMillis|30000|the same as `ChannelOption.CONNECT_TIMEOUT_MILLIS` in Netty
 |optionSoBacklog|128|the same as `ChannelOption.SO_BACKLOG` in Netty
 |childOptionWriteSpinCount|16|the same as `ChannelOption.WRITE_SPIN_COUNT` in Netty
@@ -149,6 +152,46 @@ public class MyWebSocket {
 |readerIdleTimeSeconds|0|the same as `readerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |writerIdleTimeSeconds|0|the same as `writerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |allIdleTimeSeconds|0|the same as `allIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
+
+### Configuration by application.properties
+> After setting `prefix` in `@ServerEndpoint`, then configurate by `application.properties`. for example：
+
+- first,set `prefix` 
+```java
+@ServerEndpoint(prefix = "netty-websocket")
+@Component
+public class MyWebSocket {
+    ...
+}
+```
+- then configurate in `application.properties`
+```
+netty-websocket.host=0.0.0.0
+netty-websocket.path=/
+netty-websocket.port=80
+```
+
+> The mapping of the key of `application.properties` and properties in `@ServerEndpoint`,following:
+
+| properties in `@ServerEndpoint` | key of `application.properties` | example
+|---|---|---
+|path|{prefix}.path|netty-websocket.path
+|host|{prefix}.host|netty-websocket.host
+|port|{prefix}.port|netty-websocket.port
+|optionConnectTimeoutMillis|{prefix}.option.connect-timeout-millis|netty-websocket.option.connect-timeout-millis
+|optionSoBacklog|{prefix}.option.so-backlog|netty-websocket.option.so-backlog
+|childOptionWriteSpinCount|{prefix}.child-option.write-spin-count|netty-websocket.child-option.write-spin-count
+|childOptionWriteBufferHighWaterMark|{prefix}.child-option.write-buffer-high-water-mark|netty-websocket.child-option.write-buffer-high-water-mark
+|childOptionWriteBufferLowWaterMark|{prefix}.child-option.write-buffer-low-water-mark|netty-websocket.child-option.write-buffer-low-water-mark
+|childOptionSoRcvbuf|{prefix}.child-option.so-rcvbuf|netty-websocket.child-option.so-rcvbuf
+|childOptionSoSndbuf|{prefix}.child-option.so-sndbuf|netty-websocket.child-option.so-sndbuf
+|childOptionTcpNodelay|{prefix}.child-option.tcp-nodelay|netty-websocket.child-option.tcp-nodelay
+|childOptionSoKeepalive|{prefix}.child-option.so-keepalive|netty-websocket.child-option.so-keepalive
+|childOptionSoLinger|{prefix}.child-option.so-linger|netty-websocket.child-option.so-linger
+|childOptionAllowHalfClosure|{prefix}.child-option.allow-half-closure|netty-websocket.child-option.allow-half-closure
+|readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
+|writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
+|allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
 
 ### Custom Favicon
 The way of configure favicon is the same as spring-boot.If `favicon.ico` is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:

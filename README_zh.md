@@ -7,7 +7,8 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 本项目帮助你在spring-boot中使用Netty来开发WebSocket服务器，并像spring-websocket的注解开发一样简单
 
 ### 要求
-- jdk版本为1.8或者1.8+
+- jdk版本为1.8或1.8+
+- spring-boot版本为2.0.0.RELEASE或以上
 
 
 ### 快速开始
@@ -23,7 +24,7 @@ mvn clean install
 	<dependency>
 		<groupId>com.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.5.2-SNAPSHOT</version>
+		<version>0.6.0-SNAPSHOT</version>
 	</dependency>
 ```
 
@@ -39,7 +40,7 @@ public class WebSocketConfig {
 }
 ```
 
-- 在端点类上加上`@ServerEndpoint`、`@Component`注解，并在相应的方法上加上`@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`注解，样例如下：
+- 在端点类上加上`@ServerEndpoint`、`@Component`注解，并在相应的方法上加上`@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`OnEvent`注解，样例如下：
 
 ```java
 @ServerEndpoint
@@ -135,6 +136,7 @@ public class MyWebSocket {
 |path|"/"|WebSocket的path,也可以用`value`来设置
 |host|"0.0.0.0"|WebSocket的host,`"0.0.0.0"`即是所有本地地址
 |port|80|WebSocket绑定端口号。如果为0，则使用随机端口(端口获取可见 [多端点服务](#%E5%A4%9A%E7%AB%AF%E7%82%B9%E6%9C%8D%E5%8A%A1))
+|prefix|""|当不为空时，即是使用application.properties进行配置，详情在 [通过application.properties进行配置](#%E9%80%9A%E8%BF%87APPLICATION.PROPERTIES%E8%BF%9B%E8%A1%8C%E9%85%8D%E7%BD%AE)
 |optionConnectTimeoutMillis|30000|与Netty的`ChannelOption.CONNECT_TIMEOUT_MILLIS`一致
 |optionSoBacklog|128|与Netty的`ChannelOption.SO_BACKLOG`一致
 |childOptionWriteSpinCount|16|与Netty的`ChannelOption.WRITE_SPIN_COUNT`一致
@@ -149,6 +151,46 @@ public class MyWebSocket {
 |readerIdleTimeSeconds|0|与`IdleStateHandler`中的`readerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |writerIdleTimeSeconds|0|与`IdleStateHandler`中的`writerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |allIdleTimeSeconds|0|与`IdleStateHandler`中的`allIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
+
+### 通过application.properties进行配置
+> 对注解中的`prefix`进行设置后，即可在`application.properties`中进行配置。如下：
+
+- 首先在ServerEndpoint注解中设置prefix的值
+```java
+@ServerEndpoint(prefix = "netty-websocket")
+@Component
+public class MyWebSocket {
+    ...
+}
+```
+- 接下来即可在`application.properties`中配置
+```
+netty-websocket.host=0.0.0.0
+netty-websocket.path=/
+netty-websocket.port=80
+```
+
+> `application.properties`中的key与注解`@ServerEndpoint`中属性的对应关系如下:
+
+| 注解中的属性 | 配置文件中的key | 例子
+|---|---|---
+|path|{prefix}.path|netty-websocket.path
+|host|{prefix}.host|netty-websocket.host
+|port|{prefix}.port|netty-websocket.port
+|optionConnectTimeoutMillis|{prefix}.option.connect-timeout-millis|netty-websocket.option.connect-timeout-millis
+|optionSoBacklog|{prefix}.option.so-backlog|netty-websocket.option.so-backlog
+|childOptionWriteSpinCount|{prefix}.child-option.write-spin-count|netty-websocket.child-option.write-spin-count
+|childOptionWriteBufferHighWaterMark|{prefix}.child-option.write-buffer-high-water-mark|netty-websocket.child-option.write-buffer-high-water-mark
+|childOptionWriteBufferLowWaterMark|{prefix}.child-option.write-buffer-low-water-mark|netty-websocket.child-option.write-buffer-low-water-mark
+|childOptionSoRcvbuf|{prefix}.child-option.so-rcvbuf|netty-websocket.child-option.so-rcvbuf
+|childOptionSoSndbuf|{prefix}.child-option.so-sndbuf|netty-websocket.child-option.so-sndbuf
+|childOptionTcpNodelay|{prefix}.child-option.tcp-nodelay|netty-websocket.child-option.tcp-nodelay
+|childOptionSoKeepalive|{prefix}.child-option.so-keepalive|netty-websocket.child-option.so-keepalive
+|childOptionSoLinger|{prefix}.child-option.so-linger|netty-websocket.child-option.so-linger
+|childOptionAllowHalfClosure|{prefix}.child-option.allow-half-closure|netty-websocket.child-option.allow-half-closure
+|readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
+|writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
+|allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
 
 ### 自定义Favicon
 配置favicon的方式与spring-boot中完全一致。只需将`favicon.ico`文件放到classpath的根目录下即可。如下:

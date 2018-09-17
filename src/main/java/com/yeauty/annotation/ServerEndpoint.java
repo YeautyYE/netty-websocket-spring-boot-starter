@@ -27,6 +27,11 @@ public @interface ServerEndpoint {
 
     int port() default 80;
 
+    /**
+     * if this property is not empty, means configure with application.properties
+     */
+    String prefix() default "";
+
     //------------------------- option -------------------------
 
     int optionConnectTimeoutMillis() default 30000;

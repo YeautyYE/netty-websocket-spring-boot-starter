@@ -4,9 +4,12 @@ import com.yeauty.annotation.ServerEndpoint;
 import com.yeauty.pojo.PojoEndpointServer;
 import com.yeauty.pojo.PojoMethodMapping;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -21,6 +24,9 @@ import java.util.Set;
  * @date 2018/6/25 15:20
  */
 public class ServerEndpointExporter extends ApplicationObjectSupport implements SmartInitializingSingleton {
+
+    @Autowired
+    Environment environment;
 
     private final Map<InetSocketAddress, WebsocketServer> addressWebsocketServerMap = new HashMap<>();
 
@@ -98,9 +104,83 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         boolean childOptionSoKeepalive = annotation.childOptionSoKeepalive();
         int childOptionSoLinger = annotation.childOptionSoLinger();
         boolean childOptionAllowHalfClosure = annotation.childOptionAllowHalfClosure();
+
         int readerIdleTimeSeconds = annotation.readerIdleTimeSeconds();
         int writerIdleTimeSeconds = annotation.writerIdleTimeSeconds();
         int allIdleTimeSeconds = annotation.allIdleTimeSeconds();
+
+        String prefix = annotation.prefix();
+        if (!StringUtils.isEmpty(prefix)){
+            String hostFromEnv = environment.getProperty(prefix+".host",String.class);
+            if (hostFromEnv!=null){
+                host=hostFromEnv;
+            }
+            Integer portFromEnv = environment.getProperty(prefix+".port",Integer.class);
+            if (portFromEnv!=null){
+                port=portFromEnv;
+            }
+            String pathFromEnv = environment.getProperty(prefix+".path",String.class);
+            if (pathFromEnv!=null){
+                path=pathFromEnv;
+            }
+            Integer optionConnectTimeoutMillisFromEnv = environment.getProperty(prefix+".option.connect-timeout-millis",Integer.class);
+            if (optionConnectTimeoutMillisFromEnv!=null){
+                optionConnectTimeoutMillis=optionConnectTimeoutMillisFromEnv;
+            }
+            Integer optionSoBacklogFromEnv = environment.getProperty(prefix+".option.so-backlog",Integer.class);
+            if (optionSoBacklogFromEnv!=null){
+                optionSoBacklog=optionSoBacklogFromEnv;
+            }
+            Integer childOptionWriteSpinCountFromEnv = environment.getProperty(prefix+".child-option.write-spin-count",Integer.class);
+            if (childOptionWriteSpinCountFromEnv!=null){
+                childOptionWriteSpinCount=childOptionWriteSpinCountFromEnv;
+            }
+            Integer childOptionWriteBufferHighWaterMarkFromEnv = environment.getProperty(prefix+".child-option.write-buffer-high-water-mark",Integer.class);
+            if (childOptionWriteBufferHighWaterMarkFromEnv!=null){
+                childOptionWriteBufferHighWaterMark=childOptionWriteBufferHighWaterMarkFromEnv;
+            }
+            Integer childOptionWriteBufferLowWaterMarkFromEnv = environment.getProperty(prefix+".child-option.write-buffer-low-water-mark",Integer.class);
+            if (childOptionWriteBufferLowWaterMarkFromEnv!=null){
+                childOptionWriteBufferLowWaterMark=childOptionWriteBufferLowWaterMarkFromEnv;
+            }
+            Integer childOptionSoRcvbufFromEnv = environment.getProperty(prefix+".child-option.so-rcvbuf",Integer.class);
+            if (childOptionSoRcvbufFromEnv!=null){
+                childOptionSoRcvbuf=childOptionSoRcvbufFromEnv;
+            }
+            Integer childOptionSoSndbufFromEnv = environment.getProperty(prefix+".child-option.so-sndbuf",Integer.class);
+            if (childOptionSoSndbufFromEnv!=null){
+                childOptionSoSndbuf=childOptionSoSndbufFromEnv;
+            }
+            Boolean childOptionTcpNodelayFromEnv = environment.getProperty(prefix+".child-option.tcp-nodelay",Boolean.class);
+            if (childOptionTcpNodelayFromEnv!=null){
+                childOptionTcpNodelay=childOptionTcpNodelayFromEnv;
+            }
+            Boolean childOptionSoKeepaliveFromEnv = environment.getProperty(prefix+".child-option.so-keepalive",Boolean.class);
+            if (childOptionSoKeepaliveFromEnv!=null){
+                childOptionSoKeepalive=childOptionSoKeepaliveFromEnv;
+            }
+            Integer childOptionSoLingerFromEnv = environment.getProperty(prefix+".child-option.so-linger",Integer.class);
+            if (childOptionSoLingerFromEnv!=null){
+                childOptionSoLinger=childOptionSoLingerFromEnv;
+            }
+            Boolean childOptionAllowHalfClosureFromEnv = environment.getProperty(prefix+".child-option.allow-half-closure",Boolean.class);
+            if (childOptionAllowHalfClosureFromEnv!=null){
+                childOptionAllowHalfClosure=childOptionAllowHalfClosureFromEnv;
+            }
+            Integer readerIdleTimeSecondsFromEnv = environment.getProperty(prefix+".reader-idle-time-seconds",Integer.class);
+            if (readerIdleTimeSecondsFromEnv!=null){
+                readerIdleTimeSeconds=readerIdleTimeSecondsFromEnv;
+            }
+            Integer writerIdleTimeSecondsFromEnv = environment.getProperty(prefix+".writer-idle-time-seconds",Integer.class);
+            if (writerIdleTimeSecondsFromEnv!=null){
+                writerIdleTimeSeconds=writerIdleTimeSecondsFromEnv;
+            }
+            Integer allIdleTimeSecondsFromEnv = environment.getProperty(prefix+".all-idle-time-seconds",Integer.class);
+            if (allIdleTimeSecondsFromEnv!=null){
+                allIdleTimeSeconds=allIdleTimeSecondsFromEnv;
+            }
+        }
+
         ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, optionConnectTimeoutMillis, optionSoBacklog,childOptionWriteSpinCount,childOptionWriteBufferHighWaterMark,childOptionWriteBufferLowWaterMark,childOptionSoRcvbuf,childOptionSoSndbuf,childOptionTcpNodelay,childOptionSoKeepalive,childOptionSoLinger,childOptionAllowHalfClosure,readerIdleTimeSeconds,writerIdleTimeSeconds,allIdleTimeSeconds);
         return serverEndpointConfig;
     }
