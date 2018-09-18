@@ -22,7 +22,7 @@ mvn clean install
 
 ```xml
 	<dependency>
-		<groupId>com.yeauty</groupId>
+		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
 		<version>0.6.0</version>
 	</dependency>
