@@ -1,8 +1,8 @@
-package com.yeauty.standard;
+package org.yeauty.standard;
 
-import com.yeauty.annotation.ServerEndpoint;
-import com.yeauty.pojo.PojoEndpointServer;
-import com.yeauty.pojo.PojoMethodMapping;
+import org.yeauty.annotation.ServerEndpoint;
+import org.yeauty.pojo.PojoEndpointServer;
+import org.yeauty.pojo.PojoMethodMapping;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

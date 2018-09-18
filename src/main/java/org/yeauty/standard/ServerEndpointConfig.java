@@ -1,4 +1,4 @@
-package com.yeauty.standard;
+package org.yeauty.standard;
 
 import org.springframework.util.StringUtils;
 

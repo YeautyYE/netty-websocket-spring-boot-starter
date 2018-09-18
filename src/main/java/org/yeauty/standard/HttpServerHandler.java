@@ -1,6 +1,6 @@
-package com.yeauty.standard;
+package org.yeauty.standard;
 
-import com.yeauty.pojo.PojoEndpointServer;
+import org.yeauty.pojo.PojoEndpointServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;

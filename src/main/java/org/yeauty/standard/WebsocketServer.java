@@ -1,6 +1,6 @@
-package com.yeauty.standard;
+package org.yeauty.standard;
 
-import com.yeauty.pojo.PojoEndpointServer;
+import org.yeauty.pojo.PojoEndpointServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

@@ -1,6 +1,6 @@
-package com.yeauty.pojo;
+package org.yeauty.pojo;
 
-import com.yeauty.annotation.*;
+import org.yeauty.annotation.*;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContext;

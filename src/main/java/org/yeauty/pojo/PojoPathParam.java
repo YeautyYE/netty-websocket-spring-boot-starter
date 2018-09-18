@@ -1,4 +1,4 @@
-package com.yeauty.pojo;
+package org.yeauty.pojo;
 
 /**
  * @author Yeauty

@@ -1,6 +1,6 @@
-package com.yeauty.standard;
+package org.yeauty.standard;
 
-import com.yeauty.pojo.PojoEndpointServer;
+import org.yeauty.pojo.PojoEndpointServer;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

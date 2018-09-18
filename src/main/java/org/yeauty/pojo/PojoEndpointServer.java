@@ -1,6 +1,6 @@
-package com.yeauty.pojo;
+package org.yeauty.pojo;
 
-import com.yeauty.standard.ServerEndpointConfig;
+import org.yeauty.standard.ServerEndpointConfig;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
