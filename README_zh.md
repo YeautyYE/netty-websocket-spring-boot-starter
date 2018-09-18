@@ -24,7 +24,7 @@ mvn clean install
 	<dependency>
 		<groupId>com.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.6.0-SNAPSHOT</version>
+		<version>0.6.0</version>
 	</dependency>
 ```
 
@@ -127,6 +127,10 @@ public class MyWebSocket {
 ###### @OnBinary
 > 当接收到二进制消息时，对该方法进行回调
 > 注入参数的类型:Session、byte[]
+
+###### @OnEvent
+> 当接收到Netty的事件时，对该方法进行回调
+> 注入参数的类型:Session、Object
 
 ### 配置
 > 所有的配置项都在这个注解的属性中

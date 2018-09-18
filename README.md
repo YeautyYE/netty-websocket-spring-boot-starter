@@ -24,7 +24,7 @@ mvn clean install
 	<dependency>
 		<groupId>com.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.6.0-SNAPSHOT</version>
+		<version>0.6.0</version>
 	</dependency>
 ```
 
@@ -128,6 +128,10 @@ public class MyWebSocket {
 ###### @OnBinary
 > when a WebSocket connection received the binary,the method annotated with `@OnBinary` will be called
 > classes which be injected to the method are:Session、byte[]
+
+###### @OnEvent
+> when a WebSocket connection received the event of Netty,the method annotated with `@OnEvent` will be called
+> classes which be injected to the method are:Session、Object
 
 ### Configuration
 > all configurations are configured in `@ServerEndpoint`'s property 
