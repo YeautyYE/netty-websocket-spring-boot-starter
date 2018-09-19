@@ -1,6 +1,5 @@
 package org.yeauty.standard;
 
-import org.yeauty.pojo.PojoEndpointServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -10,7 +9,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import org.yeauty.pojo.PojoEndpointServer;
 
+import java.net.BindException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -38,14 +39,14 @@ public class WebsocketServer {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,config.getConnectTimeoutMillis())
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeoutMillis())
                 .option(ChannelOption.SO_BACKLOG, config.getSoBacklog())
-                .childOption(ChannelOption.WRITE_SPIN_COUNT,config.getWriteSpinCount())
-                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,new WriteBufferWaterMark(config.getWriteBufferLowWaterMark(),config.getWriteBufferHighWaterMark()))
-                .childOption(ChannelOption.TCP_NODELAY,config.isTcpNodelay())
-                .childOption(ChannelOption.SO_KEEPALIVE,config.isSoKeepalive())
-                .childOption(ChannelOption.SO_LINGER,config.getSoLinger())
-                .childOption(ChannelOption.ALLOW_HALF_CLOSURE,config.isAllowHalfClosure())
+                .childOption(ChannelOption.WRITE_SPIN_COUNT, config.getWriteSpinCount())
+                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(config.getWriteBufferLowWaterMark(), config.getWriteBufferHighWaterMark()))
+                .childOption(ChannelOption.TCP_NODELAY, config.isTcpNodelay())
+                .childOption(ChannelOption.SO_KEEPALIVE, config.isSoKeepalive())
+                .childOption(ChannelOption.SO_LINGER, config.getSoLinger())
+                .childOption(ChannelOption.ALLOW_HALF_CLOSURE, config.isAllowHalfClosure())
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
@@ -53,28 +54,35 @@ public class WebsocketServer {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast(new HttpServerCodec());
                         pipeline.addLast(new HttpObjectAggregator(65536));
-                        pipeline.addLast(new HttpServerHandler(pojoEndpointServer,config));
+                        pipeline.addLast(new HttpServerHandler(pojoEndpointServer, config));
                     }
                 });
 
-        if(config.getSoRcvbuf()!=-1){
-            bootstrap.childOption(ChannelOption.SO_RCVBUF,config.getSoRcvbuf());
+        if (config.getSoRcvbuf() != -1) {
+            bootstrap.childOption(ChannelOption.SO_RCVBUF, config.getSoRcvbuf());
         }
 
-        if (config.getSoSndbuf()!=-1){
-            bootstrap.childOption(ChannelOption.SO_SNDBUF,config.getSoSndbuf());
+        if (config.getSoSndbuf() != -1) {
+            bootstrap.childOption(ChannelOption.SO_SNDBUF, config.getSoSndbuf());
         }
 
+        ChannelFuture channelFuture;
         if ("0.0.0.0".equals(config.getHost())) {
-            bootstrap.bind(config.getPort());
+            channelFuture = bootstrap.bind(config.getPort());
         } else {
             try {
-                bootstrap.bind(new InetSocketAddress(InetAddress.getByName(config.getHost()), config.getPort()));
+                channelFuture = bootstrap.bind(new InetSocketAddress(InetAddress.getByName(config.getHost()), config.getPort()));
             } catch (UnknownHostException e) {
-                bootstrap.bind(config.getHost(), config.getPort());
+                channelFuture = bootstrap.bind(config.getHost(), config.getPort());
                 e.printStackTrace();
             }
         }
+
+        channelFuture.addListener(future -> {
+            if (!future.isSuccess()){
+                future.cause().printStackTrace();
+            }
+        });
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             boss.shutdownGracefully().syncUninterruptibly();
