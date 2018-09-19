@@ -59,7 +59,7 @@ public class MyWebSocket {
 
     @OnMessage
     public void OnMessage(Session session, String message) {
-        System.out.println(text);
+        System.out.println(message);
         session.sendText("Hello Netty!");
     }
 

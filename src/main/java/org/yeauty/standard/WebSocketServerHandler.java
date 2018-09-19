@@ -44,7 +44,7 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<WebSocketFrame>
             return;
         }
         if (frame instanceof CloseWebSocketFrame) {
-            ctx.writeAndFlush(frame, ctx.channel().newPromise()).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(frame.retainedDuplicate(), ctx.channel().newPromise()).addListener(ChannelFutureListener.CLOSE);
             return;
         }
         if (frame instanceof BinaryWebSocketFrame) {
