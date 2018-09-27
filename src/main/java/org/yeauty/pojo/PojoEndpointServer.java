@@ -1,6 +1,5 @@
 package org.yeauty.pojo;
 
-import org.yeauty.standard.ServerEndpointConfig;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,6 +12,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.yeauty.standard.ServerEndpointConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,7 +123,7 @@ public class PojoEndpointServer {
         if (methodMapping.getOnError() != null) {
             Object implement = ctx.channel().attr(POJO_KEY).get();
             Session session = ctx.channel().attr(SESSION_KEY).get();
-            if (session==null||implement==null){
+            if (session == null || implement == null) {
                 logger.error(throwable);
             }
             try {

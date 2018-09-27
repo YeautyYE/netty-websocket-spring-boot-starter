@@ -26,37 +26,38 @@ public class Session {
         this.channel = channel;
     }
 
-    public ChannelFuture sendText(String message){
+    public ChannelFuture sendText(String message) {
         return channel.writeAndFlush(new TextWebSocketFrame(message));
     }
 
-    public ChannelFuture sendText(ByteBuf byteBuf){
+    public ChannelFuture sendText(ByteBuf byteBuf) {
         return channel.writeAndFlush(new TextWebSocketFrame(byteBuf));
     }
 
-    public ChannelFuture sendText(ByteBuffer byteBuffer){
+    public ChannelFuture sendText(ByteBuffer byteBuffer) {
         ByteBuf buffer = channel.alloc().buffer(byteBuffer.remaining());
         return channel.writeAndFlush(new TextWebSocketFrame(buffer));
     }
 
-    public ChannelFuture sendText(TextWebSocketFrame textWebSocketFrame){
+    public ChannelFuture sendText(TextWebSocketFrame textWebSocketFrame) {
         return channel.writeAndFlush(textWebSocketFrame);
     }
 
-    public ChannelFuture sendBinary(byte[] bytes){
+    public ChannelFuture sendBinary(byte[] bytes) {
         ByteBuf buffer = channel.alloc().buffer(bytes.length);
         return channel.writeAndFlush(new BinaryWebSocketFrame(buffer.writeBytes(bytes)));
     }
 
-    public ChannelFuture sendBinary(ByteBuf byteBuf){
+    public ChannelFuture sendBinary(ByteBuf byteBuf) {
         return channel.writeAndFlush(new BinaryWebSocketFrame(byteBuf));
     }
 
-    public ChannelFuture sendBinary(ByteBuffer byteBuffer){
+    public ChannelFuture sendBinary(ByteBuffer byteBuffer) {
         ByteBuf buffer = channel.alloc().buffer(byteBuffer.remaining());
         return channel.writeAndFlush(new BinaryWebSocketFrame(buffer));
     }
-    public ChannelFuture sendBinary(BinaryWebSocketFrame binaryWebSocketFrame){
+
+    public ChannelFuture sendBinary(BinaryWebSocketFrame binaryWebSocketFrame) {
         return channel.writeAndFlush(binaryWebSocketFrame);
     }
 

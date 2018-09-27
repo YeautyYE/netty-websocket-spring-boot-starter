@@ -1,9 +1,10 @@
 package org.yeauty.pojo;
 
-import org.yeauty.annotation.*;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
+import org.yeauty.annotation.*;
+import org.yeauty.exception.DeploymentException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -28,7 +29,7 @@ public class PojoMethodMapping {
     private final Class pojoClazz;
     private final ApplicationContext applicationContext;
 
-    public PojoMethodMapping(Class<?> pojoClazz, ApplicationContext context) {
+    public PojoMethodMapping(Class<?> pojoClazz, ApplicationContext context) throws DeploymentException {
         this.applicationContext = context;
         this.pojoClazz = pojoClazz;
         Method open = null;
@@ -53,7 +54,7 @@ public class PojoMethodMapping {
                         if (currentClazz == pojoClazz ||
                                 !isMethodOverride(open, method)) {
                             // Duplicate annotation
-                            throw new RuntimeException(
+                            throw new DeploymentException(
                                     "pojoMethodMapping.duplicateAnnotation OnOpen");
                         }
                     }
@@ -65,7 +66,7 @@ public class PojoMethodMapping {
                         if (currentClazz == pojoClazz ||
                                 !isMethodOverride(close, method)) {
                             // Duplicate annotation
-                            throw new RuntimeException(
+                            throw new DeploymentException(
                                     "pojoMethodMapping.duplicateAnnotation OnClose");
                         }
                     }
@@ -77,7 +78,7 @@ public class PojoMethodMapping {
                         if (currentClazz == pojoClazz ||
                                 !isMethodOverride(error, method)) {
                             // Duplicate annotation
-                            throw new RuntimeException(
+                            throw new DeploymentException(
                                     "pojoMethodMapping.duplicateAnnotation OnError");
                         }
                     }
@@ -89,7 +90,7 @@ public class PojoMethodMapping {
                         if (currentClazz == pojoClazz ||
                                 !isMethodOverride(message, method)) {
                             // Duplicate annotation
-                            throw new RuntimeException(
+                            throw new DeploymentException(
                                     "pojoMethodMapping.duplicateAnnotation onMessage");
                         }
                     }
@@ -101,7 +102,7 @@ public class PojoMethodMapping {
                         if (currentClazz == pojoClazz ||
                                 !isMethodOverride(binary, method)) {
                             // Duplicate annotation
-                            throw new RuntimeException(
+                            throw new DeploymentException(
                                     "pojoMethodMapping.duplicateAnnotation OnBinary");
                         }
                     }
@@ -113,7 +114,7 @@ public class PojoMethodMapping {
                         if (currentClazz == pojoClazz ||
                                 !isMethodOverride(event, method)) {
                             // Duplicate annotation
-                            throw new RuntimeException(
+                            throw new DeploymentException(
                                     "pojoMethodMapping.duplicateAnnotation OnEvent");
                         }
                     }
@@ -171,9 +172,9 @@ public class PojoMethodMapping {
     }
 
 
-    private void checkPublic(Method m) throws RuntimeException {
+    private void checkPublic(Method m) throws DeploymentException {
         if (!Modifier.isPublic(m.getModifiers())) {
-            throw new RuntimeException(
+            throw new DeploymentException(
                     "pojoMethodMapping.methodNotPublic " + m.getName());
         }
     }
@@ -249,7 +250,7 @@ public class PojoMethodMapping {
         return buildArgs(onEventParams, session, null, null, null, null, evt);
     }
 
-    private static PojoPathParam[] getPathParams(Method m, MethodType methodType) throws RuntimeException {
+    private static PojoPathParam[] getPathParams(Method m, MethodType methodType) throws DeploymentException {
         if (m == null) {
             return new PojoPathParam[0];
         }
@@ -276,15 +277,16 @@ public class PojoMethodMapping {
             } else if (methodType == MethodType.ON_EVENT &&
                     type.equals(Object.class)) {
                 result[i] = new PojoPathParam(type, "event");
+            } else if (type.equals(org.springframework.boot.web.servlet.server.Session.class)) {
+                throw new DeploymentException(
+                        "import org.yeauty.pojo.Session instead of org.springframework.boot.web.servlet.server.Session");
             } else {
-                if (result[i] == null) {
-                    throw new RuntimeException(
-                            "pojoMethodMapping.paramWithoutAnnotation");
-                }
+                throw new DeploymentException(
+                        "pojoMethodMapping.paramClassIncorrect");
             }
         }
         if (methodType == MethodType.ON_ERROR && !foundThrowable) {
-            throw new RuntimeException(
+            throw new DeploymentException(
                     "pojoMethodMapping.onErrorNoThrowable");
         }
         return result;
