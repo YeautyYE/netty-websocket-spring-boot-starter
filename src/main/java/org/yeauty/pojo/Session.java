@@ -15,8 +15,6 @@ import java.nio.ByteBuffer;
 /**
  * @author Yeauty
  * @version 1.0
- * @Description:TODO
- * @date 2018/6/26 14:43
  */
 public class Session {
 

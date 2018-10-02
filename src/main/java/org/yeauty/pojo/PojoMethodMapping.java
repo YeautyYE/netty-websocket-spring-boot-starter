@@ -279,7 +279,7 @@ public class PojoMethodMapping {
                 result[i] = new PojoPathParam(type, "event");
             } else if (type.equals(org.springframework.boot.web.servlet.server.Session.class)) {
                 throw new DeploymentException(
-                        "import org.yeauty.pojo.Session instead of org.springframework.boot.web.servlet.server.Session");
+                        "expect to import import org.yeauty.pojo.Session not org.springframework.boot.web.servlet.server.Session");
             } else {
                 throw new DeploymentException(
                         "pojoMethodMapping.paramClassIncorrect");

@@ -3,8 +3,6 @@ package org.yeauty.pojo;
 /**
  * @author Yeauty
  * @version 1.0
- * @Description:TODO
- * @date 2018/6/25 15:29
  */
 public class PojoPathParam {
 

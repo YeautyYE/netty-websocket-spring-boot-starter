@@ -10,8 +10,6 @@ import java.lang.annotation.Target;
 /**
  * @author Yeauty
  * @version 1.0
- * @Description:TODO
- * @date 2018/6/25 15:25
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -26,6 +24,12 @@ public @interface ServerEndpoint {
     String host() default "0.0.0.0";
 
     int port() default 80;
+
+    int bossLoopGroupThreads() default 0;
+
+    int workerLoopGroupThreads() default 0;
+
+    boolean useCompressionHandler() default false;
 
     /**
      * if this property is not empty, means configure with application.properties

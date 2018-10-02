@@ -6,7 +6,7 @@
 
     <groupId>org.yeauty</groupId>
     <artifactId>netty-websocket-spring-boot-starter</artifactId>
-    <version>0.6.3</version>
+    <version>0.6.4</version>
 
     <name>netty-websocket-spring-boot-starter</name>
     <description>
@@ -30,7 +30,8 @@
 
     <scm>
         <connection>scm:git:git://github.com/YeautyYE/netty-websocket-spring-boot-starter.git</connection>
-        <developerConnection>scm:git:ssh://github.com/YeautyYE/netty-websocket-spring-boot-starter.git</developerConnection>
+        <developerConnection>scm:git:ssh://github.com/YeautyYE/netty-websocket-spring-boot-starter.git
+        </developerConnection>
         <url>https://github.com/YeautyYE/netty-websocket-spring-boot-starter</url>
     </scm>
 
@@ -82,23 +83,27 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                                <configuration>
+                                    <additionalOptions>
+                                        <additionalOption>
+                                            -Xdoclint:none
+                                        </additionalOption>
+                                    </additionalOptions>
+                                </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                        </configuration>
                     </plugin>
                     <!-- GPG Sign Plugin -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>

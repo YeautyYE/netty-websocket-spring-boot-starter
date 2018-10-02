@@ -178,10 +178,10 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             if (config.getReaderIdleTimeSeconds() != 0 || config.getWriterIdleTimeSeconds() != 0 || config.getAllIdleTimeSeconds() != 0) {
                 pipeline.addLast(new IdleStateHandler(config.getReaderIdleTimeSeconds(), config.getWriterIdleTimeSeconds(), config.getAllIdleTimeSeconds()));
             }
-            pipeline.addLast(
-                    new WebSocketServerCompressionHandler(),
-                    new WebSocketServerHandler(pojoEndpointServer)
-            );
+            if (config.isUseCompressionHandler()) {
+                pipeline.addLast(new WebSocketServerCompressionHandler());
+            }
+            pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
             handshaker.handshake(channel, req).addListener(future -> {
                 if (future.isSuccess()) {
                     pojoEndpointServer.doOnOpen(ctx, req);

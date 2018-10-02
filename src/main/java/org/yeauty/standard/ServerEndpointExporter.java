@@ -21,8 +21,6 @@ import java.util.Set;
 /**
  * @author Yeauty
  * @version 1.0
- * @Description:TODO
- * @date 2018/6/25 15:20
  */
 public class ServerEndpointExporter extends ApplicationObjectSupport implements SmartInitializingSingleton {
 
@@ -97,6 +95,9 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         String host = annotation.host();
         int port = annotation.port();
         String path = annotation.value();
+        int bossLoopGroupThreads = annotation.bossLoopGroupThreads();
+        int workerLoopGroupThreads = annotation.workerLoopGroupThreads();
+        boolean useCompressionHandler = annotation.useCompressionHandler();
 
         int optionConnectTimeoutMillis = annotation.optionConnectTimeoutMillis();
         int optionSoBacklog = annotation.optionSoBacklog();
@@ -128,6 +129,18 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             String pathFromEnv = environment.getProperty(prefix + ".path", String.class);
             if (pathFromEnv != null) {
                 path = pathFromEnv;
+            }
+            Integer bossLoopGroupThreadsFromEnv = environment.getProperty(prefix + ".boss-loop-group-threads", Integer.class);
+            if (bossLoopGroupThreadsFromEnv != null) {
+                bossLoopGroupThreads = bossLoopGroupThreadsFromEnv;
+            }
+            Integer workerLoopGroupThreadsFromEnv = environment.getProperty(prefix + ".worker-loop-group-threads", Integer.class);
+            if (workerLoopGroupThreadsFromEnv != null) {
+                workerLoopGroupThreads = workerLoopGroupThreadsFromEnv;
+            }
+            Boolean useCompressionHandlerFromEnv = environment.getProperty(prefix + ".use-compression-handler", Boolean.class);
+            if (useCompressionHandlerFromEnv != null) {
+                useCompressionHandler = useCompressionHandlerFromEnv;
             }
             Integer optionConnectTimeoutMillisFromEnv = environment.getProperty(prefix + ".option.connect-timeout-millis", Integer.class);
             if (optionConnectTimeoutMillisFromEnv != null) {
@@ -187,7 +200,7 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             }
         }
 
-        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark, childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive, childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds);
+        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, bossLoopGroupThreads, workerLoopGroupThreads, useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark, childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive, childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds);
         return serverEndpointConfig;
     }
 

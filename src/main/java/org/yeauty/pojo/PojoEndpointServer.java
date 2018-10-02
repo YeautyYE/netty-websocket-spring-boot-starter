@@ -21,8 +21,6 @@ import java.util.Set;
 /**
  * @author Yeauty
  * @version 1.0
- * @Description:TODO
- * @date 2018/6/26 13:43
  */
 public class PojoEndpointServer {
 

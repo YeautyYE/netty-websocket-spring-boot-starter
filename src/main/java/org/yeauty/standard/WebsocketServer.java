@@ -19,8 +19,6 @@ import java.net.UnknownHostException;
 /**
  * @author Yeauty
  * @version 1.0
- * @Description:TODO
- * @date 2018/6/25 16:49
  */
 public class WebsocketServer {
 
@@ -34,8 +32,8 @@ public class WebsocketServer {
     }
 
     public void init() throws InterruptedException {
-        EventLoopGroup boss = new NioEventLoopGroup();
-        EventLoopGroup worker = new NioEventLoopGroup();
+        EventLoopGroup boss = new NioEventLoopGroup(config.getBossLoopGroupThreads());
+        EventLoopGroup worker = new NioEventLoopGroup(config.getWorkerLoopGroupThreads());
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)

@@ -19,7 +19,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.6.3</version>
+		<version>0.6.4</version>
 	</dependency>
 ```
 
@@ -136,6 +136,9 @@ public class MyWebSocket {
 |path|"/"|path of WebSocket can be aliased for `value`
 |host|"0.0.0.0"|host of WebSocket.`"0.0.0.0"` means all of local addresses
 |port|80|port of WebSocket。if the port equals to 0，it will use a random and available port(to get the port [Multi-Endpoint](#multi-endpoint))
+|bossLoopGroupThreads|0|num of threads in bossEventLoopGroup
+|workerLoopGroupThreads|0|num of threads in workerEventLoopGroup
+|useCompressionHandler|false|whether add WebSocketServerCompressionHandler to pipeline
 |prefix|""|configuration by application.properties when it is empty，details can be find in [Configuration-by-application.properties](#configuration-by-application.properties)
 |optionConnectTimeoutMillis|30000|the same as `ChannelOption.CONNECT_TIMEOUT_MILLIS` in Netty
 |optionSoBacklog|128|the same as `ChannelOption.SO_BACKLOG` in Netty
@@ -177,6 +180,9 @@ netty-websocket.port=80
 |path|{prefix}.path|netty-websocket.path
 |host|{prefix}.host|netty-websocket.host
 |port|{prefix}.port|netty-websocket.port
+|bossLoopGroupThreads|{prefix}.boss-loop-group-threads|netty-websocket.boss-loop-group-threads
+|workerLoopGroupThreads|{prefix}.worker-loop-group-threads|netty-websocket.worker-loop-group-threads
+|useCompressionHandler|{prefix}.use-compression-handler|netty-websocket.use-compression-handler
 |optionConnectTimeoutMillis|{prefix}.option.connect-timeout-millis|netty-websocket.option.connect-timeout-millis
 |optionSoBacklog|{prefix}.option.so-backlog|netty-websocket.option.so-backlog
 |childOptionWriteSpinCount|{prefix}.child-option.write-spin-count|netty-websocket.child-option.write-spin-count

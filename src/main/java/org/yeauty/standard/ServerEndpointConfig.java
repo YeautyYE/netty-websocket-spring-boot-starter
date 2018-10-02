@@ -11,14 +11,15 @@ import java.util.Set;
 /**
  * @author Yeauty
  * @version 1.0
- * @Description:TODO
- * @date 2018/6/26 14:16
  */
 public class ServerEndpointConfig {
 
     private final String HOST;
     private final int PORT;
     private final Set<String> PATH_SET;
+    private final int BOSS_LOOP_GROUP_THREADS;
+    private final int WORKER_LOOP_GROUP_THREADS;
+    private final boolean USE_COMPRESSION_HANDLER;
     private final int CONNECT_TIMEOUT_MILLIS;
     private final int SO_BACKLOG;
     private final int WRITE_SPIN_COUNT;
@@ -35,7 +36,7 @@ public class ServerEndpointConfig {
     private final int ALL_IDLE_TIME_SECONDS;
     private static Integer randomPort;
 
-    public ServerEndpointConfig(String host, int port, String path, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds) {
+    public ServerEndpointConfig(String host, int port, String path, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds) {
         if (StringUtils.isEmpty(host) || "0.0.0.0".equals(host) || "0.0.0.0/0.0.0.0".equals(host)) {
             this.HOST = "0.0.0.0";
         } else {
@@ -44,6 +45,9 @@ public class ServerEndpointConfig {
         this.PORT = getAvailablePort(port);
         PATH_SET = new HashSet<>();
         addPath(path);
+        this.BOSS_LOOP_GROUP_THREADS = bossLoopGroupThreads;
+        this.WORKER_LOOP_GROUP_THREADS = workerLoopGroupThreads;
+        this.USE_COMPRESSION_HANDLER = useCompressionHandler;
         this.CONNECT_TIMEOUT_MILLIS = connectTimeoutMillis;
         this.SO_BACKLOG = soBacklog;
         this.WRITE_SPIN_COUNT = writeSpinCount;
@@ -105,7 +109,20 @@ public class ServerEndpointConfig {
     }
 
     public Set<String> getPathSet() {
+
         return PATH_SET;
+    }
+
+    public int getBossLoopGroupThreads() {
+        return BOSS_LOOP_GROUP_THREADS;
+    }
+
+    public int getWorkerLoopGroupThreads() {
+        return WORKER_LOOP_GROUP_THREADS;
+    }
+
+    public boolean isUseCompressionHandler() {
+        return USE_COMPRESSION_HANDLER;
     }
 
     public int getConnectTimeoutMillis() {

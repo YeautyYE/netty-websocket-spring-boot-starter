@@ -19,7 +19,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.6.3</version>
+		<version>0.6.4</version>
 	</dependency>
 ```
 
@@ -135,6 +135,9 @@ public class MyWebSocket {
 |path|"/"|WebSocket的path,也可以用`value`来设置
 |host|"0.0.0.0"|WebSocket的host,`"0.0.0.0"`即是所有本地地址
 |port|80|WebSocket绑定端口号。如果为0，则使用随机端口(端口获取可见 [多端点服务](#%E5%A4%9A%E7%AB%AF%E7%82%B9%E6%9C%8D%E5%8A%A1))
+|bossLoopGroupThreads|0|bossEventLoopGroup的线程数
+|workerLoopGroupThreads|0|workerEventLoopGroup的线程数
+|useCompressionHandler|false|是否添加WebSocketServerCompressionHandler到pipeline
 |prefix|""|当不为空时，即是使用application.properties进行配置，详情在 [通过application.properties进行配置](#%E9%80%9A%E8%BF%87APPLICATION.PROPERTIES%E8%BF%9B%E8%A1%8C%E9%85%8D%E7%BD%AE)
 |optionConnectTimeoutMillis|30000|与Netty的`ChannelOption.CONNECT_TIMEOUT_MILLIS`一致
 |optionSoBacklog|128|与Netty的`ChannelOption.SO_BACKLOG`一致
@@ -176,6 +179,9 @@ netty-websocket.port=80
 |path|{prefix}.path|netty-websocket.path
 |host|{prefix}.host|netty-websocket.host
 |port|{prefix}.port|netty-websocket.port
+|bossLoopGroupThreads|{prefix}.boss-loop-group-threads|netty-websocket.boss-loop-group-threads
+|workerLoopGroupThreads|{prefix}.worker-loop-group-threads|netty-websocket.worker-loop-group-threads
+|useCompressionHandler|{prefix}.use-compression-handler|netty-websocket.use-compression-handler
 |optionConnectTimeoutMillis|{prefix}.option.connect-timeout-millis|netty-websocket.option.connect-timeout-millis
 |optionSoBacklog|{prefix}.option.so-backlog|netty-websocket.option.so-backlog
 |childOptionWriteSpinCount|{prefix}.child-option.write-spin-count|netty-websocket.child-option.write-spin-count
