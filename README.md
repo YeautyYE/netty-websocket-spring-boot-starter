@@ -35,7 +35,7 @@ public class WebSocketConfig {
 }
 ```
 
-- annotate `@ServerEndpoint`、`@Component` on endpoint class，and annotate `@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`OnEvent` on the method. e.g.
+- annotate `@ServerEndpoint`,`@Component` on endpoint class，and annotate `@OnOpen`,`@OnClose`,`@OnError`,`@OnMessage`,`@OnBinary`,`OnEvent` on the method. e.g.
 
 ```java
 @ServerEndpoint
@@ -106,7 +106,7 @@ public class MyWebSocket {
 
 ###### @OnOpen 
 > when there is a WebSocket connection accepted,the method annotated with `@OnOpen` will be called  
-> classes which be injected to the method are:Session、HttpHeaders
+> classes which be injected to the method are:Session,HttpHeaders
 
 ###### @OnClose
 > when a WebSocket connection closed,the method annotated with `@OnClose` will be called
@@ -114,19 +114,19 @@ public class MyWebSocket {
 
 ###### @OnError
 > when a WebSocket connection throw Throwable, the method annotated with `@OnError` will be called
-> classes which be injected to the method are:Session、Throwable
+> classes which be injected to the method are:Session,Throwable
 
 ###### @OnMessage
 > when a WebSocket connection received a message,the method annotated with `@OnMessage` will be called
-> classes which be injected to the method are:Session、String
+> classes which be injected to the method are:Session,String
 
 ###### @OnBinary
 > when a WebSocket connection received the binary,the method annotated with `@OnBinary` will be called
-> classes which be injected to the method are:Session、byte[]
+> classes which be injected to the method are:Session,byte[]
 
 ###### @OnEvent
 > when a WebSocket connection received the event of Netty,the method annotated with `@OnEvent` will be called
-> classes which be injected to the method are:Session、Object
+> classes which be injected to the method are:Session,Object
 
 ### Configuration
 > all configurations are configured in `@ServerEndpoint`'s property 
