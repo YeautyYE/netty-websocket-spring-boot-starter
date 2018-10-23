@@ -8,7 +8,6 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 
 ### Requirement
 - jdk version 1.8 or 1.8+
-- spring-boot version 2.0.0.RELEASE or over 2.0.0.RELEASE
 
 
 ### Quick Start
@@ -223,7 +222,7 @@ src/
               |   +- 404.html
               |   +- 5xx.html
               +- <other public assets>
-```  
+```
 
 ### Multi Endpoint
 - base on [Quick-Start](#quick-start),use annotation `@ServerEndpoint` and `@Component` in classes which hope to become a endpoint.

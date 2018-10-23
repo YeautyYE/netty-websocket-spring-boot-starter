@@ -8,7 +8,6 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 
 ### 要求
 - jdk版本为1.8或1.8+
-- spring-boot版本为2.0.0.RELEASE或以上
 
 
 ### 快速开始
@@ -221,7 +220,7 @@ src/
             |   +- 404.html
             |   +- 5xx.html
             +- <other public assets>
-```  
+```
 
 ### 多端点服务
 - 在[快速启动](#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)的基础上，在多个需要成为端点的类上使用`@ServerEndpoint`、`@Component`注解即可
