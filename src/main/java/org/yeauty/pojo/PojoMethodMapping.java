@@ -277,9 +277,12 @@ public class PojoMethodMapping {
             } else if (methodType == MethodType.ON_EVENT &&
                     type.equals(Object.class)) {
                 result[i] = new PojoPathParam(type, "event");
-            } else if (type.equals(org.springframework.boot.web.servlet.server.Session.class)) {
+            } else if (type.getSimpleName().equals("Session") && !type.equals(Session.class)) {
                 throw new DeploymentException(
-                        "expect to import import org.yeauty.pojo.Session not org.springframework.boot.web.servlet.server.Session");
+                        "expect to import org.yeauty.pojo.Session not " + type.getName());
+            } else if (type.getSimpleName().equals("HttpHeaders") && !type.equals(HttpHeaders.class)) {
+                throw new DeploymentException(
+                        "expect to import io.netty.handler.codec.http.HttpHeaders not " + type.getName());
             } else {
                 throw new DeploymentException(
                         "pojoMethodMapping.paramClassIncorrect");
