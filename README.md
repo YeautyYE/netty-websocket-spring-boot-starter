@@ -57,13 +57,13 @@ public class MyWebSocket {
     }
 
     @OnMessage
-    public void OnMessage(Session session, String message) {
+    public void onMessage(Session session, String message) {
         System.out.println(message);
         session.sendText("Hello Netty!");
     }
 
     @OnBinary
-    public void OnBinary(Session session, byte[] bytes) {
+    public void onBinary(Session session, byte[] bytes) {
         for (byte b : bytes) {
             System.out.println(b);
         }
