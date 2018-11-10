@@ -14,6 +14,7 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.yeauty.standard.ServerEndpointConfig;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -41,15 +42,14 @@ public class PojoEndpointServer {
         this.config = config;
     }
 
-    public void doOnOpen(ChannelHandlerContext ctx, FullHttpRequest req) {
+    public void doOnOpen(ChannelHandlerContext ctx, FullHttpRequest req, String path, ParameterMap finalParameterMap) {
         Channel channel = ctx.channel();
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
             methodMapping = pathMethodMappingMap.values().iterator().next();
         } else {
             Attribute<String> attrPath = channel.attr(PATH_KEY);
-            String path = req.uri();
-            attrPath.set(req.uri());
+            attrPath.set(path);
             methodMapping = pathMethodMappingMap.get(path);
             if (methodMapping == null) {
                 throw new RuntimeException("path " + path + " is not in pathMethodMappingMap ");
@@ -72,9 +72,10 @@ public class PojoEndpointServer {
             e.printStackTrace();
         }
         HttpHeaders headers = req.headers();
-        if (methodMapping.getOnOpen() != null) {
+        Method onOpenMethod = methodMapping.getOnOpen();
+        if (onOpenMethod != null) {
             try {
-                methodMapping.getOnOpen().invoke(implement, methodMapping.getOnOpenArgs(session, headers));
+                onOpenMethod.invoke(implement, methodMapping.getOnOpenArgs(session, headers, finalParameterMap));
             } catch (Throwable t) {
                 logger.error(t);
             }

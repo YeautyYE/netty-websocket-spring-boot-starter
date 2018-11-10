@@ -206,8 +206,8 @@ public class PojoMethodMapping {
         return onOpen;
     }
 
-    public Object[] getOnOpenArgs(Session session, HttpHeaders headers) {
-        return buildArgs(onOpenParams, session, headers, null, null, null, null);
+    public Object[] getOnOpenArgs(Session session, HttpHeaders headers, ParameterMap parameterMap) {
+        return buildArgs(onOpenParams, session, headers, null, null, null, null, parameterMap);
     }
 
     public Method getOnClose() {
@@ -215,7 +215,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnCloseArgs(Session session) {
-        return buildArgs(onCloseParams, session, null, null, null, null, null);
+        return buildArgs(onCloseParams, session, null, null, null, null, null, null);
     }
 
     public Method getOnError() {
@@ -223,7 +223,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnErrorArgs(Session session, Throwable throwable) {
-        return buildArgs(onErrorParams, session, null, null, null, throwable, null);
+        return buildArgs(onErrorParams, session, null, null, null, throwable, null, null);
     }
 
     public Method getOnMessage() {
@@ -231,7 +231,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnMessageArgs(Session session, String text) {
-        return buildArgs(onMessageParams, session, null, text, null, null, null);
+        return buildArgs(onMessageParams, session, null, text, null, null, null, null);
     }
 
     public Method getOnBinary() {
@@ -239,7 +239,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnBinaryArgs(Session session, byte[] bytes) {
-        return buildArgs(onBinaryParams, session, null, null, bytes, null, null);
+        return buildArgs(onBinaryParams, session, null, null, bytes, null, null, null);
     }
 
     public Method getOnEvent() {
@@ -247,7 +247,7 @@ public class PojoMethodMapping {
     }
 
     public Object[] getOnEventArgs(Session session, Object evt) {
-        return buildArgs(onEventParams, session, null, null, null, null, evt);
+        return buildArgs(onEventParams, session, null, null, null, null, evt, null);
     }
 
     private static PojoPathParam[] getPathParams(Method m, MethodType methodType) throws DeploymentException {
@@ -264,6 +264,9 @@ public class PojoMethodMapping {
             } else if (methodType == MethodType.ON_OPEN &&
                     type.equals(HttpHeaders.class)) {
                 result[i] = new PojoPathParam(type, "headers");
+            } else if (methodType == MethodType.ON_OPEN &&
+                    type.equals(ParameterMap.class)) {
+                result[i] = new PojoPathParam(type, "parameterMap");
             } else if (methodType == MethodType.ON_ERROR
                     && type.equals(Throwable.class)) {
                 foundThrowable = true;
@@ -283,6 +286,9 @@ public class PojoMethodMapping {
             } else if (type.getSimpleName().equals("HttpHeaders") && !type.equals(HttpHeaders.class)) {
                 throw new DeploymentException(
                         "expect to import io.netty.handler.codec.http.HttpHeaders not " + type.getName());
+            } else if (type.getSimpleName().equals("ParameterMap") && !type.equals(ParameterMap.class)) {
+                throw new DeploymentException(
+                        "expect to import org.yeauty.pojo.ParameterMap not " + type.getName());
             } else {
                 throw new DeploymentException(
                         "pojoMethodMapping.paramClassIncorrect");
@@ -295,9 +301,9 @@ public class PojoMethodMapping {
         return result;
     }
 
-    private static Object[] buildArgs(PojoPathParam[] pathParams,
-                                      Session session,
-                                      HttpHeaders headers, String text, byte[] bytes, Throwable throwable, Object evt) {
+    private static Object[] buildArgs(PojoPathParam[] pathParams, Session session,
+                                      HttpHeaders headers, String text, byte[] bytes,
+                                      Throwable throwable, Object evt, ParameterMap parameterMap) {
         Object[] result = new Object[pathParams.length];
         for (int i = 0; i < pathParams.length; i++) {
             Class<?> type = pathParams[i].getType();
@@ -313,6 +319,8 @@ public class PojoMethodMapping {
                 result[i] = throwable;
             } else if (type.equals(Object.class)) {
                 result[i] = evt;
+            } else if (type.equals(ParameterMap.class)) {
+                result[i] = parameterMap;
             }
         }
         return result;

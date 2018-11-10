@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
 import org.springframework.util.StringUtils;
+import org.yeauty.pojo.ParameterMap;
 import org.yeauty.pojo.PojoEndpointServer;
 
 import java.io.InputStream;
@@ -135,7 +136,21 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
-        if ("/favicon.ico".equals(req.uri())) {
+        String uri = req.uri();
+        int index = uri.indexOf("?");
+        String path = null;
+        ParameterMap parameterMap = null;
+        if (index == -1) {
+            path = uri;
+        } else {
+            path = uri.substring(0, index);
+            String originalParam = uri.substring(index + 1, uri.length());
+            if (!StringUtils.isEmpty(originalParam)) {
+                parameterMap = new ParameterMap(originalParam);
+            }
+        }
+
+        if ("/favicon.ico".equals(path)) {
             if (faviconByteBuf != null) {
                 res = new DefaultFullHttpResponse(HTTP_1_1, OK, faviconByteBuf.retainedDuplicate());
             } else {
@@ -146,7 +161,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         }
 
         Set<String> pathSet = pojoEndpointServer.getPathSet();
-        if (pathSet != null && pathSet.size() > 0 && !pathSet.contains(req.uri())) {
+        if (pathSet != null && pathSet.size() > 0 && !pathSet.contains(path)) {
             if (notFoundByteBuf != null) {
                 res = new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND, notFoundByteBuf.retainedDuplicate());
             } else {
@@ -182,9 +197,11 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 pipeline.addLast(new WebSocketServerCompressionHandler());
             }
             pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
+            final ParameterMap finalParameterMap = parameterMap;
+            final String finalPath = path;
             handshaker.handshake(channel, req).addListener(future -> {
                 if (future.isSuccess()) {
-                    pojoEndpointServer.doOnOpen(ctx, req);
+                    pojoEndpointServer.doOnOpen(ctx, req, finalPath, finalParameterMap);
                 } else {
                     handshaker.close(channel, new CloseWebSocketFrame());
                 }

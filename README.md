@@ -42,8 +42,13 @@ public class WebSocketConfig {
 public class MyWebSocket {
 
     @OnOpen
-    public void onOpen(Session session, HttpHeaders headers) throws IOException {
+    public void onOpen(Session session, HttpHeaders headers, ParameterMap parameterMap) throws IOException {
         System.out.println("new connection");
+        
+        if (parameterMap!=null) {
+            String paramValue = parameterMap.getParameter("paramKey");
+            System.out.println(paramValue);
+        }
     }
 
     @OnClose
