@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.7.0</version>
+		<version>0.7.1</version>
 	</dependency>
 ```
 
@@ -45,10 +45,8 @@ public class MyWebSocket {
     public void onOpen(Session session, HttpHeaders headers, ParameterMap parameterMap) throws IOException {
         System.out.println("new connection");
         
-        if (parameterMap!=null) {
-            String paramValue = parameterMap.getParameter("paramKey");
-            System.out.println(paramValue);
-        }
+        String paramValue = parameterMap.getParameter("paramKey");
+        System.out.println(paramValue);
     }
 
     @OnClose
@@ -109,7 +107,7 @@ public class MyWebSocket {
 
 ###### @OnOpen 
 > 当有新的WebSocket连接进入时，对该方法进行回调
-> 注入参数的类型:Session、HttpHeaders
+> 注入参数的类型:Session、HttpHeaders、ParameterMap
 
 ###### @OnClose
 > 当有WebSocket连接关闭时，对该方法进行回调

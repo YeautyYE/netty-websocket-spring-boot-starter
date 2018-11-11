@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.7.0</version>
+		<version>0.7.1</version>
 	</dependency>
 ```
 
@@ -45,10 +45,8 @@ public class MyWebSocket {
     public void onOpen(Session session, HttpHeaders headers, ParameterMap parameterMap) throws IOException {
         System.out.println("new connection");
         
-        if (parameterMap!=null) {
-            String paramValue = parameterMap.getParameter("paramKey");
-            System.out.println(paramValue);
-        }
+        String paramValue = parameterMap.getParameter("paramKey");
+        System.out.println(paramValue);
     }
 
     @OnClose
@@ -110,7 +108,7 @@ public class MyWebSocket {
 
 ###### @OnOpen 
 > when there is a WebSocket connection accepted,the method annotated with `@OnOpen` will be called  
-> classes which be injected to the method are:Session,HttpHeaders
+> classes which be injected to the method are:Session,HttpHeaders,ParameterMap
 
 ###### @OnClose
 > when a WebSocket connection closed,the method annotated with `@OnClose` will be called

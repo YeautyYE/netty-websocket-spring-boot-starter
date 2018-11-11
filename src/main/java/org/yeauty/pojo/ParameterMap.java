@@ -7,9 +7,15 @@ public class ParameterMap {
     private Map<String, List<String>> paramHashValues = new LinkedHashMap<>();
 
     public ParameterMap(String originalParam) {
+        if (originalParam == null || "".equals(originalParam.trim())) {
+            return;
+        }
         String[] params = originalParam.split("&");
         for (String param : params) {
             String[] keyValue = param.split("=");
+            if (keyValue.length != 2) {
+                continue;
+            }
             String key = keyValue[0];
             String value = keyValue[1];
             List<String> values = this.paramHashValues.get(key);

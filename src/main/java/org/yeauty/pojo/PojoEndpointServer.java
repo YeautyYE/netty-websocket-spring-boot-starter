@@ -42,7 +42,7 @@ public class PojoEndpointServer {
         this.config = config;
     }
 
-    public void doOnOpen(ChannelHandlerContext ctx, FullHttpRequest req, String path, ParameterMap finalParameterMap) {
+    public void doOnOpen(ChannelHandlerContext ctx, FullHttpRequest req, String path, String originalParam) {
         Channel channel = ctx.channel();
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
@@ -75,7 +75,12 @@ public class PojoEndpointServer {
         Method onOpenMethod = methodMapping.getOnOpen();
         if (onOpenMethod != null) {
             try {
-                onOpenMethod.invoke(implement, methodMapping.getOnOpenArgs(session, headers, finalParameterMap));
+                if (methodMapping.hasParameterMap()) {
+                    ParameterMap parameterMap = new ParameterMap(originalParam);
+                    onOpenMethod.invoke(implement, methodMapping.getOnOpenArgs(session, headers, parameterMap));
+                } else {
+                    onOpenMethod.invoke(implement, methodMapping.getOnOpenArgs(session, headers, null));
+                }
             } catch (Throwable t) {
                 logger.error(t);
             }

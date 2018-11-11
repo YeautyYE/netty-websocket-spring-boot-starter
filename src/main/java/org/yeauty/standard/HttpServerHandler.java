@@ -140,14 +140,12 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         int index = uri.indexOf("?");
         String path = null;
         ParameterMap parameterMap = null;
+        String originalParam = null;
         if (index == -1) {
             path = uri;
         } else {
             path = uri.substring(0, index);
-            String originalParam = uri.substring(index + 1, uri.length());
-            if (!StringUtils.isEmpty(originalParam)) {
-                parameterMap = new ParameterMap(originalParam);
-            }
+            originalParam = uri.substring(index + 1, uri.length());
         }
 
         if ("/favicon.ico".equals(path)) {
@@ -197,11 +195,11 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 pipeline.addLast(new WebSocketServerCompressionHandler());
             }
             pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
-            final ParameterMap finalParameterMap = parameterMap;
             final String finalPath = path;
+            final String finalOriginalParam = originalParam;
             handshaker.handshake(channel, req).addListener(future -> {
                 if (future.isSuccess()) {
-                    pojoEndpointServer.doOnOpen(ctx, req, finalPath, finalParameterMap);
+                    pojoEndpointServer.doOnOpen(ctx, req, finalPath, finalOriginalParam);
                 } else {
                     handshaker.close(channel, new CloseWebSocketFrame());
                 }

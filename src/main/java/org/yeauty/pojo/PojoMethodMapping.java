@@ -28,6 +28,7 @@ public class PojoMethodMapping {
     private final PojoPathParam[] onEventParams;
     private final Class pojoClazz;
     private final ApplicationContext applicationContext;
+    private boolean hasParameterMap = false;
 
     public PojoMethodMapping(Class<?> pojoClazz, ApplicationContext context) throws DeploymentException {
         this.applicationContext = context;
@@ -169,8 +170,18 @@ public class PojoMethodMapping {
         onMessageParams = getPathParams(onMessage, MethodType.ON_MESSAGE);
         onBinaryParams = getPathParams(onBinary, MethodType.ON_BINARY);
         onEventParams = getPathParams(onEvent, MethodType.ON_EVENT);
+
+        for (PojoPathParam onOpenParam : onOpenParams) {
+            if (ParameterMap.class.equals(onOpenParam.getType())) {
+                this.hasParameterMap = true;
+                break;
+            }
+        }
     }
 
+    public boolean hasParameterMap() {
+        return hasParameterMap;
+    }
 
     private void checkPublic(Method m) throws DeploymentException {
         if (!Modifier.isPublic(m.getModifiers())) {
