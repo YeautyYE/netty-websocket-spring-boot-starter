@@ -126,7 +126,19 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
-        if (!StringUtils.isEmpty(pojoEndpointServer.getHost()) && !pojoEndpointServer.getHost().equals("0.0.0.0") && !pojoEndpointServer.getHost().equals(req.headers().get(HttpHeaderNames.HOST))) {
+        HttpHeaders headers = req.headers();
+        String host = headers.get(HttpHeaderNames.HOST);
+        if (StringUtils.isEmpty(host)){
+            if (forbiddenByteBuf != null) {
+                res = new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN, forbiddenByteBuf.retainedDuplicate());
+            } else {
+                res = new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN);
+            }
+            sendHttpResponse(ctx, req, res);
+            return;
+        }
+
+        if (!StringUtils.isEmpty(pojoEndpointServer.getHost()) && !pojoEndpointServer.getHost().equals("0.0.0.0") && !pojoEndpointServer.getHost().equals(host.split(":")[0])) {
             if (forbiddenByteBuf != null) {
                 res = new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN, forbiddenByteBuf.retainedDuplicate());
             } else {

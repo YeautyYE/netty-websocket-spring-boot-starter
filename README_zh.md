@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.7.1</version>
+		<version>0.7.2</version>
 	</dependency>
 ```
 
