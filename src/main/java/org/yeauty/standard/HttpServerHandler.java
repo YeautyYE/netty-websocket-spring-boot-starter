@@ -128,7 +128,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         HttpHeaders headers = req.headers();
         String host = headers.get(HttpHeaderNames.HOST);
-        if (StringUtils.isEmpty(host)){
+        if (StringUtils.isEmpty(host)) {
             if (forbiddenByteBuf != null) {
                 res = new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN, forbiddenByteBuf.retainedDuplicate());
             } else {
@@ -193,7 +193,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         // Handshake
         Channel channel = ctx.channel();
-        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true);
+        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true, config.getmaxFramePayloadLength());
         WebSocketServerHandshaker handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(channel);

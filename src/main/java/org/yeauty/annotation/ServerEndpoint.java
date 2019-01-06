@@ -70,4 +70,8 @@ public @interface ServerEndpoint {
 
     int allIdleTimeSeconds() default 0;
 
+    //------------------------- handshake -------------------------
+
+    int maxFramePayloadLength() default 65536;
+
 }

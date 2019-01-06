@@ -34,9 +34,10 @@ public class ServerEndpointConfig {
     private final int READER_IDLE_TIME_SECONDS;
     private final int WRITER_IDLE_TIME_SECONDS;
     private final int ALL_IDLE_TIME_SECONDS;
+    private final int MAX_FRAME_PAYLOAD_LENGTH;
     private static Integer randomPort;
 
-    public ServerEndpointConfig(String host, int port, String path, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds) {
+    public ServerEndpointConfig(String host, int port, String path, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds, int maxFramePayloadLength) {
         if (StringUtils.isEmpty(host) || "0.0.0.0".equals(host) || "0.0.0.0/0.0.0.0".equals(host)) {
             this.HOST = "0.0.0.0";
         } else {
@@ -62,6 +63,7 @@ public class ServerEndpointConfig {
         this.READER_IDLE_TIME_SECONDS = readerIdleTimeSeconds;
         this.WRITER_IDLE_TIME_SECONDS = writerIdleTimeSeconds;
         this.ALL_IDLE_TIME_SECONDS = allIdleTimeSeconds;
+        this.MAX_FRAME_PAYLOAD_LENGTH = maxFramePayloadLength;
     }
 
 
@@ -183,5 +185,9 @@ public class ServerEndpointConfig {
 
     public int getAllIdleTimeSeconds() {
         return ALL_IDLE_TIME_SECONDS;
+    }
+
+    public int getmaxFramePayloadLength() {
+        return MAX_FRAME_PAYLOAD_LENGTH;
     }
 }

@@ -116,6 +116,8 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         int writerIdleTimeSeconds = annotation.writerIdleTimeSeconds();
         int allIdleTimeSeconds = annotation.allIdleTimeSeconds();
 
+        int maxFramePayloadLength = annotation.maxFramePayloadLength();
+
         String prefix = annotation.prefix();
         if (!StringUtils.isEmpty(prefix)) {
             String hostFromEnv = environment.getProperty(prefix + ".host", String.class);
@@ -198,9 +200,13 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             if (allIdleTimeSecondsFromEnv != null) {
                 allIdleTimeSeconds = allIdleTimeSecondsFromEnv;
             }
+            Integer maxFramePayloadLengthEnv = environment.getProperty(prefix + ".max-frame-payload-length", Integer.class);
+            if (maxFramePayloadLengthEnv != null) {
+                maxFramePayloadLength = maxFramePayloadLengthEnv;
+            }
         }
 
-        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, bossLoopGroupThreads, workerLoopGroupThreads, useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark, childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive, childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds);
+        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, bossLoopGroupThreads, workerLoopGroupThreads, useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark, childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive, childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds,maxFramePayloadLength);
         return serverEndpointConfig;
     }
 

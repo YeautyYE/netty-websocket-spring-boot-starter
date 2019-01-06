@@ -18,11 +18,11 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.7.2</version>
+		<version>0.7.3</version>
 	</dependency>
 ```
 
-- construct a `ServerEndpointExporter` instance to Spring container to start the WebSocket. e.g.
+- construct a `ServerEndpointExporter` instance to Spring IOC container to start the WebSocket. e.g.
 
 ```java
 @Configuration
@@ -156,6 +156,7 @@ public class MyWebSocket {
 |readerIdleTimeSeconds|0|the same as `readerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |writerIdleTimeSeconds|0|the same as `writerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |allIdleTimeSeconds|0|the same as `allIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
+|maxFramePayloadLength|65536|Maximum allowable frame payload length.
 
 ### Configuration by application.properties
 > After setting `prefix` in `@ServerEndpoint`, then configurate by `application.properties`. for example：
@@ -199,6 +200,7 @@ netty-websocket.port=80
 |readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
 |writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
 |allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
+|maxFramePayloadLength|{prefix}.maxFramePayloadLength|netty-websocket.maxFramePayloadLength
 
 ### Custom Favicon
 The way of configure favicon is the same as spring-boot.If `favicon.ico` is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:

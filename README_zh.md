@@ -18,11 +18,11 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.7.2</version>
+		<version>0.7.3</version>
 	</dependency>
 ```
 
-- new一个`ServerEndpointExporter`对象，交给Spring容器，表示要开启WebSocket功能，样例如下:
+- new一个`ServerEndpointExporter`对象，交给Spring IOC容器，表示要开启WebSocket功能，样例如下:
 
 ```java
 @Configuration
@@ -155,6 +155,7 @@ public class MyWebSocket {
 |readerIdleTimeSeconds|0|与`IdleStateHandler`中的`readerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |writerIdleTimeSeconds|0|与`IdleStateHandler`中的`writerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |allIdleTimeSeconds|0|与`IdleStateHandler`中的`allIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
+|maxFramePayloadLength|65536|最大允许帧载荷长度
 
 ### 通过application.properties进行配置
 > 对注解中的`prefix`进行设置后，即可在`application.properties`中进行配置。如下：
@@ -198,6 +199,7 @@ netty-websocket.port=80
 |readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
 |writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
 |allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
+|maxFramePayloadLength|{prefix}.maxFramePayloadLength|netty-websocket.maxFramePayloadLength
 
 ### 自定义Favicon
 配置favicon的方式与spring-boot中完全一致。只需将`favicon.ico`文件放到classpath的根目录下即可。如下:
