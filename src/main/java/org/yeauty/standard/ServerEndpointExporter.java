@@ -4,7 +4,7 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.yeauty.annotation.ServerEndpoint;
@@ -64,7 +64,7 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
     }
 
     private void registerEndpoint(Class<?> endpointClass) {
-        ServerEndpoint annotation = AnnotationUtils.findAnnotation(endpointClass, ServerEndpoint.class);
+        ServerEndpoint annotation = AnnotatedElementUtils.findMergedAnnotation(endpointClass, ServerEndpoint.class);
         if (annotation == null) {
             throw new IllegalStateException("missingAnnotation ServerEndpoint");
         }
