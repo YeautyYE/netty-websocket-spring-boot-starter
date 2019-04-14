@@ -62,6 +62,7 @@ public class PojoEndpointServer {
             attrPojo.set(implement);
         } catch (Exception e) {
             e.printStackTrace();
+            return;
         }
         Attribute<Session> attrSession = channel.attr(SESSION_KEY);
         Session session = null;
@@ -128,10 +129,12 @@ public class PojoEndpointServer {
             Object implement = ctx.channel().attr(POJO_KEY).get();
             Session session = ctx.channel().attr(SESSION_KEY).get();
             if (session == null || implement == null) {
-                logger.error(throwable);
+                return;
             }
             try {
-                methodMapping.getOnError().invoke(implement, methodMapping.getOnErrorArgs(session, throwable));
+                Method method = methodMapping.getOnError();
+                Object[] args = methodMapping.getOnErrorArgs(session, throwable);
+                method.invoke(implement, args);
             } catch (Throwable t) {
                 logger.error(t);
             }

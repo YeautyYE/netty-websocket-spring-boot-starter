@@ -68,7 +68,6 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         if (annotation == null) {
             throw new IllegalStateException("missingAnnotation ServerEndpoint");
         }
-        String path = annotation.value();
         ServerEndpointConfig serverEndpointConfig = buildConfig(annotation);
 
         ApplicationContext context = getApplicationContext();
@@ -87,6 +86,14 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             addressWebsocketServerMap.put(inetSocketAddress, websocketServer);
 
         } else {
+            String path = annotation.value();
+            String prefix = annotation.prefix();
+            if (!StringUtils.isEmpty(prefix)) {
+                String pathFromEnv = environment.getProperty(prefix + ".path", String.class);
+                if (pathFromEnv != null) {
+                    path = pathFromEnv;
+                }
+            }
             websocketServer.getPojoEndpointServer().addPathPojoMethodMapping(path, pojoMethodMapping);
         }
     }
