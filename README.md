@@ -18,20 +18,8 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.7.6</version>
+		<version>0.8.0</version>
 	</dependency>
-```
-
-- construct a `ServerEndpointExporter` instance to Spring IOC container to start the WebSocket. e.g.
-
-```java
-@Configuration
-public class WebSocketConfig {
-    @Bean
-    public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
-    }
-}
 ```
 
 - annotate `@ServerEndpoint`,`@Component` on endpoint class，and annotate `@OnOpen`,`@OnClose`,`@OnError`,`@OnMessage`,`@OnBinary`,`OnEvent` on the method. e.g.

@@ -37,6 +37,8 @@ public class PojoEndpointServer {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PojoEndpointServer.class);
 
+    private boolean isOpened = false;
+
     public PojoEndpointServer(PojoMethodMapping methodMapping, ServerEndpointConfig config) {
         pathMethodMappingMap.put(config.getPathSet().iterator().next(), methodMapping);
         this.config = config;
@@ -72,6 +74,7 @@ public class PojoEndpointServer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        isOpened = true;
         HttpHeaders headers = req.headers();
         Method onOpenMethod = methodMapping.getOnOpen();
         if (onOpenMethod != null) {
@@ -89,6 +92,9 @@ public class PojoEndpointServer {
     }
 
     public void doOnClose(ChannelHandlerContext ctx) {
+        if (!isOpened){
+            return;
+        }
         Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
@@ -103,7 +109,12 @@ public class PojoEndpointServer {
         if (methodMapping.getOnClose() != null) {
             Object implement = ctx.channel().attr(POJO_KEY).get();
             Session session = ctx.channel().attr(SESSION_KEY).get();
-            if (implement == null || session == null) {
+            if (session == null ) {
+                logger.error("session is null");
+                return;
+            }
+            if (implement == null){
+                logger.error("implement is null");
                 return;
             }
             try {
@@ -117,6 +128,9 @@ public class PojoEndpointServer {
 
 
     public void doOnError(ChannelHandlerContext ctx, Throwable throwable) {
+        if (!isOpened){
+            return;
+        }
         Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
@@ -128,7 +142,12 @@ public class PojoEndpointServer {
         if (methodMapping.getOnError() != null) {
             Object implement = ctx.channel().attr(POJO_KEY).get();
             Session session = ctx.channel().attr(SESSION_KEY).get();
-            if (session == null || implement == null) {
+            if (session == null ) {
+                logger.error("session is null");
+                return;
+            }
+            if (implement == null){
+                logger.error("implement is null");
                 return;
             }
             try {
@@ -142,6 +161,9 @@ public class PojoEndpointServer {
     }
 
     public void doOnMessage(ChannelHandlerContext ctx, WebSocketFrame frame) {
+        if (!isOpened){
+            return;
+        }
         Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
@@ -163,6 +185,9 @@ public class PojoEndpointServer {
     }
 
     public void doOnBinary(ChannelHandlerContext ctx, WebSocketFrame frame) {
+        if (!isOpened){
+            return;
+        }
         Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
@@ -187,6 +212,9 @@ public class PojoEndpointServer {
     }
 
     public void doOnEvent(ChannelHandlerContext ctx, Object evt) {
+        if (!isOpened){
+            return;
+        }
         Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {

@@ -18,20 +18,8 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.7.6</version>
+		<version>0.8.0</version>
 	</dependency>
-```
-
-- new一个`ServerEndpointExporter`对象，交给Spring IOC容器，表示要开启WebSocket功能，样例如下:
-
-```java
-@Configuration
-public class WebSocketConfig {
-    @Bean
-    public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
-    }
-}
 ```
 
 - 在端点类上加上`@ServerEndpoint`、`@Component`注解，并在相应的方法上加上`@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`OnEvent`注解，样例如下：
