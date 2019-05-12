@@ -22,7 +22,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	</dependency>
 ```
 
-- annotate `@ServerEndpoint`,`@Component` on endpoint class，and annotate `@OnOpen`,`@OnClose`,`@OnError`,`@OnMessage`,`@OnBinary`,`OnEvent` on the method. e.g.
+- annotate `@ServerEndpoint`,`@Component` on endpoint class，and annotate `@OnOpen`,`@OnClose`,`@OnError`,`@OnMessage`,`@OnBinary`,`@OnEvent` on the method. e.g.
 
 ```java
 @ServerEndpoint

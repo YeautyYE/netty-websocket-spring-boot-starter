@@ -22,7 +22,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	</dependency>
 ```
 
-- 在端点类上加上`@ServerEndpoint`、`@Component`注解，并在相应的方法上加上`@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`OnEvent`注解，样例如下：
+- 在端点类上加上`@ServerEndpoint`、`@Component`注解，并在相应的方法上加上`@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`@OnEvent`注解，样例如下：
 
 ```java
 @ServerEndpoint
