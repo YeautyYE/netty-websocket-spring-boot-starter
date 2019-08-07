@@ -188,7 +188,7 @@ netty-websocket.port=80
 |readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
 |writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
 |allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
-|maxFramePayloadLength|{prefix}.maxFramePayloadLength|netty-websocket.maxFramePayloadLength
+|maxFramePayloadLength|{prefix}.max-frame-payload-length|netty-websocket.max-frame-payload-length
 
 ### Custom Favicon
 The way of configure favicon is the same as spring-boot.If `favicon.ico` is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:

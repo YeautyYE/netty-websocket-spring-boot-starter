@@ -187,7 +187,7 @@ netty-websocket.port=80
 |readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
 |writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
 |allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
-|maxFramePayloadLength|{prefix}.maxFramePayloadLength|netty-websocket.maxFramePayloadLength
+|maxFramePayloadLength|{prefix}.max-frame-payload-length|netty-websocket.max-frame-payload-length
 
 ### 自定义Favicon
 配置favicon的方式与spring-boot中完全一致。只需将`favicon.ico`文件放到classpath的根目录下即可。如下:
