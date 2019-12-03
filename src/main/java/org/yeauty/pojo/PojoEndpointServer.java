@@ -234,6 +234,25 @@ public class PojoEndpointServer {
         }
     }
 
+    public boolean doOnAuth(ParameterMap parameterMap) {
+        PojoMethodMapping methodMapping = null;
+        if (pathMethodMappingMap.size() == 1) {
+            methodMapping = pathMethodMappingMap.values().iterator().next();
+            if (methodMapping.getOnAuth() != null) {
+                try {
+                    Object isAuth = methodMapping.getOnAuth().invoke(methodMapping.getEndpointInstance(),
+                            methodMapping.getOnAuthArgs(parameterMap));
+                    return (Boolean)isAuth;
+                } catch (Throwable t) {
+                    logger.error(t);
+                }
+            }else {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String getHost() {
         return config.getHost();
     }

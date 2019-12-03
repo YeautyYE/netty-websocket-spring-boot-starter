@@ -191,6 +191,13 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
+        //auth
+        if(!pojoEndpointServer.doOnAuth(new ParameterMap(originalParam))){
+            res = new DefaultFullHttpResponse(HTTP_1_1, UNAUTHORIZED);
+            sendHttpResponse(ctx, req, res);
+            return;
+        }
+
         // Handshake
         Channel channel = ctx.channel();
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true, config.getmaxFramePayloadLength());

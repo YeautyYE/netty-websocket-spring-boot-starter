@@ -20,6 +20,7 @@ public class PojoMethodMapping {
     private final Method onMessage;
     private final Method onBinary;
     private final Method onEvent;
+    private final Method onAuth;
     private final PojoPathParam[] onOpenParams;
     private final PojoPathParam[] onCloseParams;
     private final PojoPathParam[] onErrorParams;
@@ -39,6 +40,7 @@ public class PojoMethodMapping {
         Method message = null;
         Method binary = null;
         Method event = null;
+        Method auth = null;
         Method[] pojoClazzMethods = null;
         Class<?> currentClazz = pojoClazz;
         while (!currentClazz.equals(Object.class)) {
@@ -48,78 +50,20 @@ public class PojoMethodMapping {
             }
             for (Method method : currentClazzMethods) {
                 if (method.getAnnotation(OnOpen.class) != null) {
-                    checkPublic(method);
-                    if (open == null) {
-                        open = method;
-                    } else {
-                        if (currentClazz == pojoClazz ||
-                                !isMethodOverride(open, method)) {
-                            // Duplicate annotation
-                            throw new DeploymentException(
-                                    "pojoMethodMapping.duplicateAnnotation OnOpen");
-                        }
-                    }
+                    open = getMethod(pojoClazz, open, currentClazz, method, "pojoMethodMapping.duplicateAnnotation OnOpen");
                 } else if (method.getAnnotation(OnClose.class) != null) {
-                    checkPublic(method);
-                    if (close == null) {
-                        close = method;
-                    } else {
-                        if (currentClazz == pojoClazz ||
-                                !isMethodOverride(close, method)) {
-                            // Duplicate annotation
-                            throw new DeploymentException(
-                                    "pojoMethodMapping.duplicateAnnotation OnClose");
-                        }
-                    }
+                    close = getMethod(pojoClazz, close, currentClazz, method, "pojoMethodMapping.duplicateAnnotation OnClose");
                 } else if (method.getAnnotation(OnError.class) != null) {
-                    checkPublic(method);
-                    if (error == null) {
-                        error = method;
-                    } else {
-                        if (currentClazz == pojoClazz ||
-                                !isMethodOverride(error, method)) {
-                            // Duplicate annotation
-                            throw new DeploymentException(
-                                    "pojoMethodMapping.duplicateAnnotation OnError");
-                        }
-                    }
+                    error = getMethod(pojoClazz, error, currentClazz, method, "pojoMethodMapping.duplicateAnnotation OnError");
                 } else if (method.getAnnotation(OnMessage.class) != null) {
-                    checkPublic(method);
-                    if (message == null) {
-                        message = method;
-                    } else {
-                        if (currentClazz == pojoClazz ||
-                                !isMethodOverride(message, method)) {
-                            // Duplicate annotation
-                            throw new DeploymentException(
-                                    "pojoMethodMapping.duplicateAnnotation onMessage");
-                        }
-                    }
+                    message = getMethod(pojoClazz, message, currentClazz, method, "pojoMethodMapping.duplicateAnnotation onMessage");
                 } else if (method.getAnnotation(OnBinary.class) != null) {
-                    checkPublic(method);
-                    if (binary == null) {
-                        binary = method;
-                    } else {
-                        if (currentClazz == pojoClazz ||
-                                !isMethodOverride(binary, method)) {
-                            // Duplicate annotation
-                            throw new DeploymentException(
-                                    "pojoMethodMapping.duplicateAnnotation OnBinary");
-                        }
-                    }
+                    binary = getMethod(pojoClazz, binary, currentClazz, method, "pojoMethodMapping.duplicateAnnotation OnBinary");
                 } else if (method.getAnnotation(OnEvent.class) != null) {
-                    checkPublic(method);
-                    if (event == null) {
-                        event = method;
-                    } else {
-                        if (currentClazz == pojoClazz ||
-                                !isMethodOverride(event, method)) {
-                            // Duplicate annotation
-                            throw new DeploymentException(
-                                    "pojoMethodMapping.duplicateAnnotation OnEvent");
-                        }
-                    }
-                } else {
+                    event = getMethod(pojoClazz, event, currentClazz, method, "pojoMethodMapping.duplicateAnnotation OnEvent");
+                } else if (method.getAnnotation(OnAuth.class) != null) {
+                    auth = getMethod(pojoClazz, auth, currentClazz, method, "pojoMethodMapping.duplicateAnnotation OnAuth");
+                }else {
                     // Method not annotated
                 }
             }
@@ -127,7 +71,15 @@ public class PojoMethodMapping {
         }
         // If the methods are not on pojoClazz and they are overridden
         // by a non annotated method in pojoClazz, they should be ignored
-        if (open != null && open.getDeclaringClass() != pojoClazz) {
+        ignoreMethods(pojoClazz, open, pojoClazzMethods, OnOpen.class);
+        ignoreMethods(pojoClazz, close, pojoClazzMethods, OnClose.class);
+        ignoreMethods(pojoClazz, error, pojoClazzMethods, OnError.class);
+        ignoreMethods(pojoClazz, message, pojoClazzMethods, OnMessage.class);
+        ignoreMethods(pojoClazz, binary, pojoClazzMethods, OnBinary.class);
+        ignoreMethods(pojoClazz, event, pojoClazzMethods, OnEvent.class);
+        ignoreMethods(pojoClazz, auth, pojoClazzMethods, OnAuth.class);
+
+/*        if (open != null && open.getDeclaringClass() != pojoClazz) {
             if (isOverridenWithoutAnnotation(pojoClazzMethods, open, OnOpen.class)) {
                 open = null;
             }
@@ -157,6 +109,11 @@ public class PojoMethodMapping {
                 event = null;
             }
         }
+        if (auth != null && auth.getDeclaringClass() != pojoClazz) {
+            if (isOverridenWithoutAnnotation(pojoClazzMethods, auth, OnAuth.class)) {
+                auth = null;
+            }
+        }*/
 
         this.onOpen = open;
         this.onClose = close;
@@ -164,6 +121,7 @@ public class PojoMethodMapping {
         this.onMessage = message;
         this.onBinary = binary;
         this.onEvent = event;
+        this.onAuth = auth;
         onOpenParams = getPathParams(onOpen, MethodType.ON_OPEN);
         onCloseParams = getPathParams(onClose, MethodType.ON_CLOSE);
         onErrorParams = getPathParams(onError, MethodType.ON_ERROR);
@@ -177,6 +135,29 @@ public class PojoMethodMapping {
                 break;
             }
         }
+    }
+
+    private void ignoreMethods(Class<?> pojoClazz, Method method, Method[] pojoClazzMethods,
+                               Class<? extends Annotation> annotation){
+        if (method != null && method.getDeclaringClass() != pojoClazz) {
+            if (isOverridenWithoutAnnotation(pojoClazzMethods, method, annotation)) {
+                method = null;
+            }
+        }
+    }
+
+    private Method getMethod(Class<?> pojoClazz, Method methodVariable, Class<?> currentClazz, Method method, String s) throws DeploymentException {
+        checkPublic(method);
+        if (methodVariable == null) {
+            methodVariable = method;
+        } else {
+            if (currentClazz == pojoClazz ||
+                    !isMethodOverride(methodVariable, method)) {
+                // Duplicate annotation
+                throw new DeploymentException(s);
+            }
+        }
+        return methodVariable;
     }
 
     public boolean hasParameterMap() {
@@ -261,6 +242,14 @@ public class PojoMethodMapping {
         return buildArgs(onEventParams, session, null, null, null, null, evt, null);
     }
 
+    public Method getOnAuth() {
+        return onAuth;
+    }
+
+    public Object[] getOnAuthArgs(ParameterMap parameterMap) {
+        return new Object[]{parameterMap};
+    }
+
     private static PojoPathParam[] getPathParams(Method m, MethodType methodType) throws DeploymentException {
         if (m == null) {
             return new PojoPathParam[0];
@@ -343,6 +332,7 @@ public class PojoMethodMapping {
         ON_MESSAGE,
         ON_BINARY,
         ON_EVENT,
-        ON_ERROR
+        ON_ERROR,
+        ON_AUTH
     }
 }

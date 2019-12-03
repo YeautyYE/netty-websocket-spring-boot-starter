@@ -84,7 +84,6 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             PojoEndpointServer pojoEndpointServer = new PojoEndpointServer(pojoMethodMapping, serverEndpointConfig);
             websocketServer = new WebsocketServer(pojoEndpointServer, serverEndpointConfig);
             addressWebsocketServerMap.put(inetSocketAddress, websocketServer);
-
         } else {
             String path = annotation.value();
             String prefix = annotation.prefix();
