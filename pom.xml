@@ -6,7 +6,7 @@
 
     <groupId>org.yeauty</groupId>
     <artifactId>netty-websocket-spring-boot-starter</artifactId>
-    <version>0.8.0</version>
+    <version>0.9.0</version>
 
     <name>netty-websocket-spring-boot-starter</name>
     <description>
@@ -36,17 +36,18 @@
     </scm>
 
     <properties>
-        <netty.version>4.1.25.Final</netty.version>
+        <netty.version>4.1.44.Final</netty.version>
         <spring-boot.version>2.0.0.RELEASE</spring-boot.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
             <version>${spring-boot.version}</version>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-http</artifactId>
