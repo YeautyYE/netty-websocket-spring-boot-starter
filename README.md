@@ -160,7 +160,7 @@ public class MyWebSocket {
 
 - first,use `${...}` in `@ServerEndpoint` 
 ```java
-@ServerEndpoint(host = "${ws.host}",port = "${ws.port})
+@ServerEndpoint(host = "${ws.host}",port = "${ws.port}")
 public class MyWebSocket {
     ...
 }

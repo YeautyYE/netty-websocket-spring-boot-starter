@@ -160,7 +160,7 @@ public class MyWebSocket {
 
 - 首先在`@ServerEndpoint`注解的属性中使用`${...}`占位符
 ```java
-@ServerEndpoint(host = "${ws.host}",port = "${ws.port})
+@ServerEndpoint(host = "${ws.host}",port = "${ws.port}")
 public class MyWebSocket {
     ...
 }
