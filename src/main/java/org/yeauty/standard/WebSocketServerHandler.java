@@ -21,22 +21,22 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<WebSocketFrame>
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        pojoEndpointServer.doOnError(ctx, cause);
+        pojoEndpointServer.doOnError(ctx.channel(), cause);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        pojoEndpointServer.doOnClose(ctx);
+        pojoEndpointServer.doOnClose(ctx.channel());
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        pojoEndpointServer.doOnEvent(ctx, evt);
+        pojoEndpointServer.doOnEvent(ctx.channel(), evt);
     }
 
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
         if (frame instanceof TextWebSocketFrame) {
-            pojoEndpointServer.doOnMessage(ctx, frame);
+            pojoEndpointServer.doOnMessage(ctx.channel(), frame);
             return;
         }
         if (frame instanceof PingWebSocketFrame) {
@@ -48,7 +48,7 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<WebSocketFrame>
             return;
         }
         if (frame instanceof BinaryWebSocketFrame) {
-            pojoEndpointServer.doOnBinary(ctx, frame);
+            pojoEndpointServer.doOnBinary(ctx.channel(), frame);
             return;
         }
         if (frame instanceof PongWebSocketFrame) {

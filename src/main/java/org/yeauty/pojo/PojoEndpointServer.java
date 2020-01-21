@@ -1,6 +1,5 @@
 package org.yeauty.pojo;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -12,12 +11,12 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.springframework.beans.TypeMismatchException;
 import org.yeauty.standard.ServerEndpointConfig;
+import org.yeauty.support.*;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Yeauty
@@ -25,77 +24,80 @@ import java.util.Set;
  */
 public class PojoEndpointServer {
 
-    private static final AttributeKey POJO_KEY = AttributeKey.valueOf("WEBSOCKET_IMPLEMENT");
+    private static final AttributeKey<Object> POJO_KEY = AttributeKey.valueOf("WEBSOCKET_IMPLEMENT");
 
-    private static final AttributeKey<Session> SESSION_KEY = AttributeKey.valueOf("WEBSOCKET_SESSION");
+    public static final AttributeKey<Session> SESSION_KEY = AttributeKey.valueOf("WEBSOCKET_SESSION");
 
     private static final AttributeKey<String> PATH_KEY = AttributeKey.valueOf("WEBSOCKET_PATH");
+
+    public static final AttributeKey<Map<String, String>> URI_TEMPLATE = AttributeKey.valueOf("WEBSOCKET_URI_TEMPLATE");
+
+    public static final AttributeKey<Map<String, List<String>>> REQUEST_PARAM = AttributeKey.valueOf("WEBSOCKET_REQUEST_PARAM");
+
+    public static final AttributeKey<HttpHeaders> HEADERS = AttributeKey.valueOf("WEBSOCKET_HEADERS");
 
     private final Map<String, PojoMethodMapping> pathMethodMappingMap = new HashMap<>();
 
     private final ServerEndpointConfig config;
 
+    private Set<WsPathMatcher> pathMatchers = new HashSet<>();
+
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PojoEndpointServer.class);
 
-    private boolean isOpened = false;
-
-    public PojoEndpointServer(PojoMethodMapping methodMapping, ServerEndpointConfig config) {
-        pathMethodMappingMap.put(config.getPathSet().iterator().next(), methodMapping);
+    public PojoEndpointServer(PojoMethodMapping methodMapping, ServerEndpointConfig config, String path) {
+        addPathPojoMethodMapping(path, methodMapping);
         this.config = config;
     }
 
-    public void doOnOpen(ChannelHandlerContext ctx, FullHttpRequest req, String path, String originalParam) {
-        Channel channel = ctx.channel();
+    public boolean hasBeforeHandshake(Channel channel, String path) {
+        PojoMethodMapping methodMapping = getPojoMethodMapping(path, channel);
+        return methodMapping.getBeforeHandshake()!=null;
+    }
+
+    public void doBeforeHandshake(Channel channel, FullHttpRequest req, String path) {
         PojoMethodMapping methodMapping = null;
-        if (pathMethodMappingMap.size() == 1) {
-            methodMapping = pathMethodMappingMap.values().iterator().next();
-        } else {
-            Attribute<String> attrPath = channel.attr(PATH_KEY);
-            attrPath.set(path);
-            methodMapping = pathMethodMappingMap.get(path);
-            if (methodMapping == null) {
-                throw new RuntimeException("path " + path + " is not in pathMethodMappingMap ");
-            }
-        }
-        Attribute attrPojo = channel.attr(POJO_KEY);
+        methodMapping = getPojoMethodMapping(path, channel);
+
         Object implement = null;
         try {
             implement = methodMapping.getEndpointInstance();
-            attrPojo.set(implement);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
             return;
         }
-        Attribute<Session> attrSession = channel.attr(SESSION_KEY);
-        Session session = null;
-        try {
-            session = new Session(channel);
-            attrSession.set(session);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        isOpened = true;
-        HttpHeaders headers = req.headers();
-        Method onOpenMethod = methodMapping.getOnOpen();
-        if (onOpenMethod != null) {
+        channel.attr(POJO_KEY).set(implement);
+        Session session = new Session(channel);
+        channel.attr(SESSION_KEY).set(session);
+        Method beforeHandshake = methodMapping.getBeforeHandshake();
+        if (beforeHandshake != null) {
             try {
-                if (methodMapping.hasParameterMap()) {
-                    ParameterMap parameterMap = new ParameterMap(originalParam);
-                    onOpenMethod.invoke(implement, methodMapping.getOnOpenArgs(session, headers, parameterMap));
-                } else {
-                    onOpenMethod.invoke(implement, methodMapping.getOnOpenArgs(session, headers, null));
-                }
+                beforeHandshake.invoke(implement, methodMapping.getBeforeHandshakeArgs(channel, req));
+            } catch (TypeMismatchException e) {
+                throw e;
             } catch (Throwable t) {
                 logger.error(t);
             }
         }
     }
 
-    public void doOnClose(ChannelHandlerContext ctx) {
-        if (!isOpened){
-            return;
+    public void doOnOpen(Channel channel, FullHttpRequest req, String path) {
+        PojoMethodMapping methodMapping = getPojoMethodMapping(path, channel);
+
+        Object implement = channel.attr(POJO_KEY).get();
+        Method onOpenMethod = methodMapping.getOnOpen();
+        if (onOpenMethod != null) {
+            try {
+                onOpenMethod.invoke(implement, methodMapping.getOnOpenArgs(channel, req));
+            } catch (TypeMismatchException e) {
+                throw e;
+            } catch (Throwable t) {
+                logger.error(t);
+            }
         }
-        Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
+    }
+
+    public void doOnClose(Channel channel) {
+        Attribute<String> attrPath = channel.attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
             methodMapping = pathMethodMappingMap.values().iterator().next();
@@ -107,19 +109,13 @@ public class PojoEndpointServer {
             }
         }
         if (methodMapping.getOnClose() != null) {
-            Object implement = ctx.channel().attr(POJO_KEY).get();
-            Session session = ctx.channel().attr(SESSION_KEY).get();
-            if (session == null ) {
-                logger.error("session is null");
+            if (!channel.hasAttr(SESSION_KEY)) {
                 return;
             }
-            if (implement == null){
-                logger.error("implement is null");
-                return;
-            }
+            Object implement = channel.attr(POJO_KEY).get();
             try {
                 methodMapping.getOnClose().invoke(implement,
-                        methodMapping.getOnCloseArgs(session));
+                        methodMapping.getOnCloseArgs(channel));
             } catch (Throwable t) {
                 logger.error(t);
             }
@@ -127,11 +123,8 @@ public class PojoEndpointServer {
     }
 
 
-    public void doOnError(ChannelHandlerContext ctx, Throwable throwable) {
-        if (!isOpened){
-            return;
-        }
-        Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
+    public void doOnError(Channel channel, Throwable throwable) {
+        Attribute<String> attrPath = channel.attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
             methodMapping = pathMethodMappingMap.values().iterator().next();
@@ -140,19 +133,14 @@ public class PojoEndpointServer {
             methodMapping = pathMethodMappingMap.get(path);
         }
         if (methodMapping.getOnError() != null) {
-            Object implement = ctx.channel().attr(POJO_KEY).get();
-            Session session = ctx.channel().attr(SESSION_KEY).get();
-            if (session == null ) {
-                logger.error("session is null");
+            if (!channel.hasAttr(SESSION_KEY)) {
                 return;
             }
-            if (implement == null){
-                logger.error("implement is null");
-                return;
-            }
+            Object implement = channel.attr(POJO_KEY).get();
+            Session session = channel.attr(SESSION_KEY).get();
             try {
                 Method method = methodMapping.getOnError();
-                Object[] args = methodMapping.getOnErrorArgs(session, throwable);
+                Object[] args = methodMapping.getOnErrorArgs(channel, throwable);
                 method.invoke(implement, args);
             } catch (Throwable t) {
                 logger.error(t);
@@ -160,11 +148,8 @@ public class PojoEndpointServer {
         }
     }
 
-    public void doOnMessage(ChannelHandlerContext ctx, WebSocketFrame frame) {
-        if (!isOpened){
-            return;
-        }
-        Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
+    public void doOnMessage(Channel channel, WebSocketFrame frame) {
+        Attribute<String> attrPath = channel.attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
             methodMapping = pathMethodMappingMap.values().iterator().next();
@@ -174,21 +159,17 @@ public class PojoEndpointServer {
         }
         if (methodMapping.getOnMessage() != null) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
-            Object implement = ctx.channel().attr(POJO_KEY).get();
-            Session session = ctx.channel().attr(SESSION_KEY).get();
+            Object implement = channel.attr(POJO_KEY).get();
             try {
-                methodMapping.getOnMessage().invoke(implement, methodMapping.getOnMessageArgs(session, textFrame.text()));
+                methodMapping.getOnMessage().invoke(implement, methodMapping.getOnMessageArgs(channel, textFrame));
             } catch (Throwable t) {
                 logger.error(t);
             }
         }
     }
 
-    public void doOnBinary(ChannelHandlerContext ctx, WebSocketFrame frame) {
-        if (!isOpened){
-            return;
-        }
-        Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
+    public void doOnBinary(Channel channel, WebSocketFrame frame) {
+        Attribute<String> attrPath = channel.attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
             methodMapping = pathMethodMappingMap.values().iterator().next();
@@ -198,24 +179,17 @@ public class PojoEndpointServer {
         }
         if (methodMapping.getOnBinary() != null) {
             BinaryWebSocketFrame binaryWebSocketFrame = (BinaryWebSocketFrame) frame;
-            ByteBuf content = binaryWebSocketFrame.content();
-            byte[] bytes = new byte[content.readableBytes()];
-            content.readBytes(bytes);
-            Object implement = ctx.channel().attr(POJO_KEY).get();
-            Session session = ctx.channel().attr(SESSION_KEY).get();
+            Object implement = channel.attr(POJO_KEY).get();
             try {
-                methodMapping.getOnBinary().invoke(implement, methodMapping.getOnBinaryArgs(session, bytes));
+                methodMapping.getOnBinary().invoke(implement, methodMapping.getOnBinaryArgs(channel, binaryWebSocketFrame));
             } catch (Throwable t) {
                 logger.error(t);
             }
         }
     }
 
-    public void doOnEvent(ChannelHandlerContext ctx, Object evt) {
-        if (!isOpened){
-            return;
-        }
-        Attribute<String> attrPath = ctx.channel().attr(PATH_KEY);
+    public void doOnEvent(Channel channel, Object evt) {
+        Attribute<String> attrPath = channel.attr(PATH_KEY);
         PojoMethodMapping methodMapping = null;
         if (pathMethodMappingMap.size() == 1) {
             methodMapping = pathMethodMappingMap.values().iterator().next();
@@ -224,10 +198,12 @@ public class PojoEndpointServer {
             methodMapping = pathMethodMappingMap.get(path);
         }
         if (methodMapping.getOnEvent() != null) {
-            Object implement = ctx.channel().attr(POJO_KEY).get();
-            Session session = ctx.channel().attr(SESSION_KEY).get();
+            if (!channel.hasAttr(SESSION_KEY)) {
+                return;
+            }
+            Object implement = channel.attr(POJO_KEY).get();
             try {
-                methodMapping.getOnEvent().invoke(implement, methodMapping.getOnEventArgs(session, evt));
+                methodMapping.getOnEvent().invoke(implement, methodMapping.getOnEventArgs(channel, evt));
             } catch (Throwable t) {
                 logger.error(t);
             }
@@ -238,13 +214,37 @@ public class PojoEndpointServer {
         return config.getHost();
     }
 
-    public Set<String> getPathSet() {
-        return config.getPathSet();
+    public int getPort() {
+        return config.getPort();
+    }
+
+    public Set<WsPathMatcher> getPathMatcherSet() {
+        return pathMatchers;
     }
 
     public void addPathPojoMethodMapping(String path, PojoMethodMapping pojoMethodMapping) {
-        path = config.addPath(path);
         pathMethodMappingMap.put(path, pojoMethodMapping);
+        for (MethodArgumentResolver onOpenArgResolver : pojoMethodMapping.getOnOpenArgResolvers()) {
+            if (onOpenArgResolver instanceof PathVariableMethodArgumentResolver || onOpenArgResolver instanceof PathVariableMapMethodArgumentResolver) {
+                pathMatchers.add(new AntPathMatcherWraaper(path));
+                return;
+            }
+        }
+        pathMatchers.add(new DefaultPathMatcher(path));
     }
 
+    private PojoMethodMapping getPojoMethodMapping(String path, Channel channel) {
+        PojoMethodMapping methodMapping;
+        if (pathMethodMappingMap.size() == 1) {
+            methodMapping = pathMethodMappingMap.values().iterator().next();
+        } else {
+            Attribute<String> attrPath = channel.attr(PATH_KEY);
+            attrPath.set(path);
+            methodMapping = pathMethodMappingMap.get(path);
+            if (methodMapping == null) {
+                throw new RuntimeException("path " + path + " is not in pathMethodMappingMap ");
+            }
+        }
+        return methodMapping;
+    }
 }

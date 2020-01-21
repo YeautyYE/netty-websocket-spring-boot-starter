@@ -1,38 +1,61 @@
 package org.yeauty.pojo;
 
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.yeauty.annotation.*;
 import org.yeauty.exception.DeploymentException;
+import org.yeauty.support.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class PojoMethodMapping {
 
+    private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
+    private final Method beforeHandshake;
     private final Method onOpen;
     private final Method onClose;
     private final Method onError;
     private final Method onMessage;
     private final Method onBinary;
     private final Method onEvent;
-    private final PojoPathParam[] onOpenParams;
-    private final PojoPathParam[] onCloseParams;
-    private final PojoPathParam[] onErrorParams;
-    private final PojoPathParam[] onMessageParams;
-    private final PojoPathParam[] onBinaryParams;
-    private final PojoPathParam[] onEventParams;
+    private final MethodParameter[] beforeHandshakeParameters;
+    private final MethodParameter[] onOpenParameters;
+    private final MethodParameter[] onCloseParameters;
+    private final MethodParameter[] onErrorParameters;
+    private final MethodParameter[] onMessageParameters;
+    private final MethodParameter[] onBinaryParameters;
+    private final MethodParameter[] onEventParameters;
+    private final MethodArgumentResolver[] beforeHandshakeArgResolvers;
+    private final MethodArgumentResolver[] onOpenArgResolvers;
+    private final MethodArgumentResolver[] onCloseArgResolvers;
+    private final MethodArgumentResolver[] onErrorArgResolvers;
+    private final MethodArgumentResolver[] onMessageArgResolvers;
+    private final MethodArgumentResolver[] onBinaryArgResolvers;
+    private final MethodArgumentResolver[] onEventArgResolvers;
     private final Class pojoClazz;
     private final ApplicationContext applicationContext;
-    private boolean hasParameterMap = false;
+    private final AbstractBeanFactory beanFactory;
 
-    public PojoMethodMapping(Class<?> pojoClazz, ApplicationContext context) throws DeploymentException {
+    public PojoMethodMapping(Class<?> pojoClazz, ApplicationContext context, AbstractBeanFactory beanFactory) throws DeploymentException {
         this.applicationContext = context;
         this.pojoClazz = pojoClazz;
+        this.beanFactory = beanFactory;
+        Method handshake = null;
         Method open = null;
         Method close = null;
         Method error = null;
@@ -47,7 +70,19 @@ public class PojoMethodMapping {
                 pojoClazzMethods = currentClazzMethods;
             }
             for (Method method : currentClazzMethods) {
-                if (method.getAnnotation(OnOpen.class) != null) {
+                if (method.getAnnotation(BeforeHandshake.class) != null) {
+                    checkPublic(method);
+                    if (handshake == null) {
+                        handshake = method;
+                    } else {
+                        if (currentClazz == pojoClazz ||
+                                !isMethodOverride(handshake, method)) {
+                            // Duplicate annotation
+                            throw new DeploymentException(
+                                    "pojoMethodMapping.duplicateAnnotation BeforeHandshake");
+                        }
+                    }
+                } else if (method.getAnnotation(OnOpen.class) != null) {
                     checkPublic(method);
                     if (open == null) {
                         open = method;
@@ -127,6 +162,11 @@ public class PojoMethodMapping {
         }
         // If the methods are not on pojoClazz and they are overridden
         // by a non annotated method in pojoClazz, they should be ignored
+        if (handshake != null && handshake.getDeclaringClass() != pojoClazz) {
+            if (isOverridenWithoutAnnotation(pojoClazzMethods, handshake, BeforeHandshake.class)) {
+                handshake = null;
+            }
+        }
         if (open != null && open.getDeclaringClass() != pojoClazz) {
             if (isOverridenWithoutAnnotation(pojoClazzMethods, open, OnOpen.class)) {
                 open = null;
@@ -158,29 +198,27 @@ public class PojoMethodMapping {
             }
         }
 
+        this.beforeHandshake = handshake;
         this.onOpen = open;
         this.onClose = close;
         this.onError = error;
         this.onMessage = message;
         this.onBinary = binary;
         this.onEvent = event;
-        onOpenParams = getPathParams(onOpen, MethodType.ON_OPEN);
-        onCloseParams = getPathParams(onClose, MethodType.ON_CLOSE);
-        onErrorParams = getPathParams(onError, MethodType.ON_ERROR);
-        onMessageParams = getPathParams(onMessage, MethodType.ON_MESSAGE);
-        onBinaryParams = getPathParams(onBinary, MethodType.ON_BINARY);
-        onEventParams = getPathParams(onEvent, MethodType.ON_EVENT);
-
-        for (PojoPathParam onOpenParam : onOpenParams) {
-            if (ParameterMap.class.equals(onOpenParam.getType())) {
-                this.hasParameterMap = true;
-                break;
-            }
-        }
-    }
-
-    public boolean hasParameterMap() {
-        return hasParameterMap;
+        beforeHandshakeParameters = getParameters(beforeHandshake);
+        onOpenParameters = getParameters(onOpen);
+        onCloseParameters = getParameters(onClose);
+        onMessageParameters = getParameters(onMessage);
+        onErrorParameters = getParameters(onError);
+        onBinaryParameters = getParameters(onBinary);
+        onEventParameters = getParameters(onEvent);
+        beforeHandshakeArgResolvers = getResolvers(beforeHandshakeParameters);
+        onOpenArgResolvers = getResolvers(onOpenParameters);
+        onCloseArgResolvers = getResolvers(onCloseParameters);
+        onMessageArgResolvers = getResolvers(onMessageParameters);
+        onErrorArgResolvers = getResolvers(onErrorParameters);
+        onBinaryArgResolvers = getResolvers(onBinaryParameters);
+        onEventArgResolvers = getResolvers(onEventParameters);
     }
 
     private void checkPublic(Method m) throws DeploymentException {
@@ -206,143 +244,128 @@ public class PojoMethodMapping {
         return false;
     }
 
-    public Object getEndpointInstance() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    Object getEndpointInstance() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Object implement = pojoClazz.getDeclaredConstructor().newInstance();
         AutowiredAnnotationBeanPostProcessor postProcessor = applicationContext.getBean(AutowiredAnnotationBeanPostProcessor.class);
         postProcessor.postProcessPropertyValues(null, null, implement, null);
         return implement;
     }
 
-    public Method getOnOpen() {
+    Method getBeforeHandshake() {
+        return beforeHandshake;
+    }
+
+    Object[] getBeforeHandshakeArgs(Channel channel, FullHttpRequest req) throws Exception {
+        return getMethodArgumentValues(channel, req, beforeHandshakeParameters, beforeHandshakeArgResolvers);
+    }
+
+    Method getOnOpen() {
         return onOpen;
     }
 
-    public Object[] getOnOpenArgs(Session session, HttpHeaders headers, ParameterMap parameterMap) {
-        return buildArgs(onOpenParams, session, headers, null, null, null, null, parameterMap);
+    Object[] getOnOpenArgs(Channel channel, FullHttpRequest req) throws Exception {
+        return getMethodArgumentValues(channel, req, onOpenParameters, onOpenArgResolvers);
     }
 
-    public Method getOnClose() {
+    MethodArgumentResolver[] getOnOpenArgResolvers() {
+        return onOpenArgResolvers;
+    }
+
+    Method getOnClose() {
         return onClose;
     }
 
-    public Object[] getOnCloseArgs(Session session) {
-        return buildArgs(onCloseParams, session, null, null, null, null, null, null);
+    Object[] getOnCloseArgs(Channel channel) throws Exception {
+        return getMethodArgumentValues(channel, null, onCloseParameters, onCloseArgResolvers);
     }
 
-    public Method getOnError() {
+    Method getOnError() {
         return onError;
     }
 
-    public Object[] getOnErrorArgs(Session session, Throwable throwable) {
-        return buildArgs(onErrorParams, session, null, null, null, throwable, null, null);
+    Object[] getOnErrorArgs(Channel channel, Throwable throwable) throws Exception {
+        return getMethodArgumentValues(channel, throwable, onErrorParameters, onErrorArgResolvers);
     }
 
-    public Method getOnMessage() {
+    Method getOnMessage() {
         return onMessage;
     }
 
-    public Object[] getOnMessageArgs(Session session, String text) {
-        return buildArgs(onMessageParams, session, null, text, null, null, null, null);
+    Object[] getOnMessageArgs(Channel channel, TextWebSocketFrame textWebSocketFrame) throws Exception {
+        return getMethodArgumentValues(channel, textWebSocketFrame, onMessageParameters, onMessageArgResolvers);
     }
 
-    public Method getOnBinary() {
+    Method getOnBinary() {
         return onBinary;
     }
 
-    public Object[] getOnBinaryArgs(Session session, byte[] bytes) {
-        return buildArgs(onBinaryParams, session, null, null, bytes, null, null, null);
+    Object[] getOnBinaryArgs(Channel channel, BinaryWebSocketFrame binaryWebSocketFrame) throws Exception {
+        return getMethodArgumentValues(channel, binaryWebSocketFrame, onBinaryParameters, onBinaryArgResolvers);
     }
 
-    public Method getOnEvent() {
+    Method getOnEvent() {
         return onEvent;
     }
 
-    public Object[] getOnEventArgs(Session session, Object evt) {
-        return buildArgs(onEventParams, session, null, null, null, null, evt, null);
+    Object[] getOnEventArgs(Channel channel, Object evt) throws Exception {
+        return getMethodArgumentValues(channel, evt, onEventParameters, onEventArgResolvers);
     }
 
-    private static PojoPathParam[] getPathParams(Method m, MethodType methodType) throws DeploymentException {
+    private Object[] getMethodArgumentValues(Channel channel, Object object, MethodParameter[] parameters, MethodArgumentResolver[] resolvers) throws Exception {
+        Object[] objects = new Object[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            MethodParameter parameter = parameters[i];
+            MethodArgumentResolver resolver = resolvers[i];
+            Object arg = resolver.resolveArgument(parameter, channel, object);
+            objects[i] = arg;
+        }
+        return objects;
+    }
+
+    private MethodArgumentResolver[] getResolvers(MethodParameter[] parameters) throws DeploymentException {
+        MethodArgumentResolver[] methodArgumentResolvers = new MethodArgumentResolver[parameters.length];
+        List<MethodArgumentResolver> resolvers = getDefaultResolvers();
+        for (int i = 0; i < parameters.length; i++) {
+            MethodParameter parameter = parameters[i];
+            for (MethodArgumentResolver resolver : resolvers) {
+                if (resolver.supportsParameter(parameter)) {
+                    methodArgumentResolvers[i] = resolver;
+                    break;
+                }
+            }
+            if (methodArgumentResolvers[i] == null) {
+                throw new DeploymentException("pojoMethodMapping.paramClassIncorrect parameter name : " + parameter.getParameterName());
+            }
+        }
+        return methodArgumentResolvers;
+    }
+
+    private List<MethodArgumentResolver> getDefaultResolvers() {
+        List<MethodArgumentResolver> resolvers = new ArrayList<>();
+        resolvers.add(new SessionMethodArgumentResolver());
+        resolvers.add(new HttpHeadersMethodArgumentResolver());
+        resolvers.add(new TextMethodArgumentResolver());
+        resolvers.add(new ThrowableMethodArgumentResolver());
+        resolvers.add(new ByteMethodArgumentResolver());
+        resolvers.add(new RequestParamMethodArgumentResolver(beanFactory));
+        resolvers.add(new RequestParamMapMethodArgumentResolver());
+        resolvers.add(new PathVariableMethodArgumentResolver(beanFactory));
+        resolvers.add(new PathVariableMapMethodArgumentResolver());
+        resolvers.add(new EventMethodArgumentResolver(beanFactory));
+        return resolvers;
+    }
+
+    private static MethodParameter[] getParameters(Method m) {
         if (m == null) {
-            return new PojoPathParam[0];
+            return new MethodParameter[0];
         }
-        boolean foundThrowable = false;
-        Class<?>[] types = m.getParameterTypes();
-        PojoPathParam[] result = new PojoPathParam[types.length];
-        for (int i = 0; i < types.length; i++) {
-            Class<?> type = types[i];
-            if (type.equals(Session.class)) {
-                result[i] = new PojoPathParam(type, "session");
-            } else if (methodType == MethodType.ON_OPEN &&
-                    type.equals(HttpHeaders.class)) {
-                result[i] = new PojoPathParam(type, "headers");
-            } else if (methodType == MethodType.ON_OPEN &&
-                    type.equals(ParameterMap.class)) {
-                result[i] = new PojoPathParam(type, "parameterMap");
-            } else if (methodType == MethodType.ON_ERROR
-                    && type.equals(Throwable.class)) {
-                foundThrowable = true;
-                result[i] = new PojoPathParam(type, "throwable");
-            } else if (methodType == MethodType.ON_MESSAGE &&
-                    type.equals(String.class)) {
-                result[i] = new PojoPathParam(type, "text");
-            } else if (methodType == MethodType.ON_BINARY &&
-                    type.equals(byte[].class)) {
-                result[i] = new PojoPathParam(type, "binary");
-            } else if (methodType == MethodType.ON_EVENT &&
-                    type.equals(Object.class)) {
-                result[i] = new PojoPathParam(type, "event");
-            } else if (type.getSimpleName().equals("Session") && !type.equals(Session.class)) {
-                throw new DeploymentException(
-                        "expect to import org.yeauty.pojo.Session not " + type.getName());
-            } else if (type.getSimpleName().equals("HttpHeaders") && !type.equals(HttpHeaders.class)) {
-                throw new DeploymentException(
-                        "expect to import io.netty.handler.codec.http.HttpHeaders not " + type.getName());
-            } else if (type.getSimpleName().equals("ParameterMap") && !type.equals(ParameterMap.class)) {
-                throw new DeploymentException(
-                        "expect to import org.yeauty.pojo.ParameterMap not " + type.getName());
-            } else {
-                throw new DeploymentException(
-                        "pojoMethodMapping.paramClassIncorrect");
-            }
-        }
-        if (methodType == MethodType.ON_ERROR && !foundThrowable) {
-            throw new DeploymentException(
-                    "pojoMethodMapping.onErrorNoThrowable");
+        int count = m.getParameterCount();
+        MethodParameter[] result = new MethodParameter[count];
+        for (int i = 0; i < count; i++) {
+            MethodParameter methodParameter = new MethodParameter(m, i);
+            methodParameter.initParameterNameDiscovery(parameterNameDiscoverer);
+            result[i] = methodParameter;
         }
         return result;
-    }
-
-    private static Object[] buildArgs(PojoPathParam[] pathParams, Session session,
-                                      HttpHeaders headers, String text, byte[] bytes,
-                                      Throwable throwable, Object evt, ParameterMap parameterMap) {
-        Object[] result = new Object[pathParams.length];
-        for (int i = 0; i < pathParams.length; i++) {
-            Class<?> type = pathParams[i].getType();
-            if (type.equals(Session.class)) {
-                result[i] = session;
-            } else if (type.equals(HttpHeaders.class)) {
-                result[i] = headers;
-            } else if (type.equals(String.class)) {
-                result[i] = text;
-            } else if (type.equals(byte[].class)) {
-                result[i] = bytes;
-            } else if (type.equals(Throwable.class)) {
-                result[i] = throwable;
-            } else if (type.equals(Object.class)) {
-                result[i] = evt;
-            } else if (type.equals(ParameterMap.class)) {
-                result[i] = parameterMap;
-            }
-        }
-        return result;
-    }
-
-    private enum MethodType {
-        ON_OPEN,
-        ON_CLOSE,
-        ON_MESSAGE,
-        ON_BINARY,
-        ON_EVENT,
-        ON_ERROR
     }
 }

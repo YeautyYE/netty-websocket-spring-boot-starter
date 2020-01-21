@@ -1,6 +1,7 @@
 package org.yeauty.annotation;
 
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,6 +12,7 @@ import java.lang.annotation.Target;
  * @author Yeauty
  * @version 1.0
  */
+@Component
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ServerEndpoint {
@@ -23,55 +25,50 @@ public @interface ServerEndpoint {
 
     String host() default "0.0.0.0";
 
-    int port() default 80;
+    String port() default "80";
 
-    int bossLoopGroupThreads() default 0;
+    String bossLoopGroupThreads() default "0";
 
-    int workerLoopGroupThreads() default 0;
+    String workerLoopGroupThreads() default "0";
 
-    boolean useCompressionHandler() default false;
-
-    /**
-     * if this property is not empty, means configure with application.properties
-     */
-    String prefix() default "";
+    String useCompressionHandler() default "false";
 
     //------------------------- option -------------------------
 
-    int optionConnectTimeoutMillis() default 30000;
+    String optionConnectTimeoutMillis() default "30000";
 
-    int optionSoBacklog() default 128;
+    String optionSoBacklog() default "128";
 
     //------------------------- childOption -------------------------
 
-    int childOptionWriteSpinCount() default 16;
+    String childOptionWriteSpinCount() default "16";
 
-    int childOptionWriteBufferHighWaterMark() default 64 * 1024;
+    String childOptionWriteBufferHighWaterMark() default "65536";
 
-    int childOptionWriteBufferLowWaterMark() default 32 * 1024;
+    String childOptionWriteBufferLowWaterMark() default "32768";
 
-    int childOptionSoRcvbuf() default -1;
+    String childOptionSoRcvbuf() default "-1";
 
-    int childOptionSoSndbuf() default -1;
+    String childOptionSoSndbuf() default "-1";
 
-    boolean childOptionTcpNodelay() default true;
+    String childOptionTcpNodelay() default "true";
 
-    boolean childOptionSoKeepalive() default false;
+    String childOptionSoKeepalive() default "false";
 
-    int childOptionSoLinger() default -1;
+    String childOptionSoLinger() default "-1";
 
-    boolean childOptionAllowHalfClosure() default false;
+    String childOptionAllowHalfClosure() default "false";
 
     //------------------------- idleEvent -------------------------
 
-    int readerIdleTimeSeconds() default 0;
+    String readerIdleTimeSeconds() default "0";
 
-    int writerIdleTimeSeconds() default 0;
+    String writerIdleTimeSeconds() default "0";
 
-    int allIdleTimeSeconds() default 0;
+    String allIdleTimeSeconds() default "0";
 
     //------------------------- handshake -------------------------
 
-    int maxFramePayloadLength() default 65536;
+    String maxFramePayloadLength() default "65536";
 
 }

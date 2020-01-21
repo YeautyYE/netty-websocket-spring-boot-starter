@@ -10,10 +10,12 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.util.StringUtils;
-import org.yeauty.pojo.ParameterMap;
 import org.yeauty.pojo.PojoEndpointServer;
+import org.yeauty.support.WsPathMatcher;
 
 import java.io.InputStream;
 import java.util.Set;
@@ -79,6 +81,10 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         try {
             handleHttpRequest(ctx, msg);
+        } catch (TypeMismatchException e) {
+            FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST);
+            sendHttpResponse(ctx, msg, res);
+            e.printStackTrace();
         } catch (Exception e) {
             FullHttpResponse res;
             if (internalServerErrorByteBuf != null) {
@@ -93,12 +99,12 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        pojoEndpointServer.doOnError(ctx, cause);
+        pojoEndpointServer.doOnError(ctx.channel(), cause);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        pojoEndpointServer.doOnClose(ctx);
+        pojoEndpointServer.doOnClose(ctx.channel());
         super.channelInactive(ctx);
     }
 
@@ -148,18 +154,8 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
-        String uri = req.uri();
-        int index = uri.indexOf("?");
-        String path = null;
-        ParameterMap parameterMap = null;
-        String originalParam = null;
-        if (index == -1) {
-            path = uri;
-        } else {
-            path = uri.substring(0, index);
-            originalParam = uri.substring(index + 1, uri.length());
-        }
-
+        QueryStringDecoder decoder = new QueryStringDecoder(req.uri());
+        String path = decoder.path();
         if ("/favicon.ico".equals(path)) {
             if (faviconByteBuf != null) {
                 res = new DefaultFullHttpResponse(HTTP_1_1, OK, faviconByteBuf.retainedDuplicate());
@@ -170,8 +166,19 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
-        Set<String> pathSet = pojoEndpointServer.getPathSet();
-        if (pathSet != null && pathSet.size() > 0 && !pathSet.contains(path)) {
+        Channel channel = ctx.channel();
+
+        //path match
+        String pattern = null;
+        Set<WsPathMatcher> pathMatcherSet = pojoEndpointServer.getPathMatcherSet();
+        for (WsPathMatcher pathMatcher : pathMatcherSet) {
+            if (pathMatcher.matchAndExtract(decoder, channel)) {
+                pattern = pathMatcher.getPattern();
+                break;
+            }
+        }
+
+        if (pattern == null) {
             if (notFoundByteBuf != null) {
                 res = new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND, notFoundByteBuf.retainedDuplicate());
             } else {
@@ -191,9 +198,22 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
+        String subprotocols = null;
+
+        if (pojoEndpointServer.hasBeforeHandshake(channel, pattern)) {
+            pojoEndpointServer.doBeforeHandshake(channel, req, pattern);
+            if (!channel.isActive()) {
+                return;
+            }
+
+            AttributeKey<String> subprotocolsAttrKey = AttributeKey.valueOf("subprotocols");
+            if (channel.hasAttr(subprotocolsAttrKey)) {
+                subprotocols = ctx.channel().attr(subprotocolsAttrKey).get();
+            }
+        }
+
         // Handshake
-        Channel channel = ctx.channel();
-        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true, config.getmaxFramePayloadLength());
+        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), subprotocols, true, config.getmaxFramePayloadLength());
         WebSocketServerHandshaker handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(channel);
@@ -207,11 +227,10 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 pipeline.addLast(new WebSocketServerCompressionHandler());
             }
             pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
-            final String finalPath = path;
-            final String finalOriginalParam = originalParam;
+            String finalPattern = pattern;
             handshaker.handshake(channel, req).addListener(future -> {
                 if (future.isSuccess()) {
-                    pojoEndpointServer.doOnOpen(ctx, req, finalPath, finalOriginalParam);
+                    pojoEndpointServer.doOnOpen(channel, req, finalPattern);
                 } else {
                     handshaker.close(channel, new CloseWebSocketFrame());
                 }

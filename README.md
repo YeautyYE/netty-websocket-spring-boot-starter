@@ -18,23 +18,29 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.8.0</version>
+		<version>0.9.0</version>
 	</dependency>
 ```
 
-- annotate `@ServerEndpoint`,`@Component` on endpoint class，and annotate `@OnOpen`,`@OnClose`,`@OnError`,`@OnMessage`,`@OnBinary`,`@OnEvent` on the method. e.g.
+- annotate `@ServerEndpoint` on endpoint class，and annotate `@BeforeHandshake`,`@OnOpen`,`@OnClose`,`@OnError`,`@OnMessage`,`@OnBinary`,`@OnEvent` on the method. e.g.
 
 ```java
-@ServerEndpoint
-@Component
+@ServerEndpoint(path = "/ws/{arg}")
 public class MyWebSocket {
 
+    @BeforeHandshake
+    public void handshake(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
+        session.setSubprotocols("stomp");
+        if (!req.equals("ok")){
+            System.out.println("Authentication failed!");
+            session.close();
+        }
+    }
+    
     @OnOpen
-    public void onOpen(Session session, HttpHeaders headers, ParameterMap parameterMap) throws IOException {
+    public void onOpen(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
         System.out.println("new connection");
-        
-        String paramValue = parameterMap.getParameter("paramKey");
-        System.out.println(paramValue);
+        System.out.println(req);
     }
 
     @OnClose
@@ -84,19 +90,22 @@ public class MyWebSocket {
 }
 ```
 
-- use Websocket client to connect `ws://127.0.0.1:80` 
+- use Websocket client to connect `ws://127.0.0.1:80/ws/xxx` 
 
 
 ### Annotation
 ###### @ServerEndpoint 
-> declaring `ServerEndpointExporter` in Spring configuration,it will scan for WebSocket endpoints that 
-> tated with `ServerEndpoint` .
+> declaring `ServerEndpointExporter` in Spring configuration,it will scan for WebSocket endpoints that be annotated  with `ServerEndpoint` .
 > beans that be annotated with `ServerEndpoint` will be registered as a WebSocket endpoint.
 > all [configurations](#configuration) are inside this annotation ( e.g. `@ServerEndpoint("/ws")` )
 
+###### @BeforeHandshake 
+> when there is a connection accepted,the method annotated with `@BeforeHandshake` will be called  
+> classes which be injected to the method are:Session,HttpHeaders...
+
 ###### @OnOpen 
-> when there is a WebSocket connection accepted,the method annotated with `@OnOpen` will be called  
-> classes which be injected to the method are:Session,HttpHeaders,ParameterMap
+> when there is a WebSocket connection completed,the method annotated with `@OnOpen` will be called  
+> classes which be injected to the method are:Session,HttpHeaders...
 
 ###### @OnClose
 > when a WebSocket connection closed,the method annotated with `@OnClose` will be called
@@ -147,48 +156,20 @@ public class MyWebSocket {
 |maxFramePayloadLength|65536|Maximum allowable frame payload length.
 
 ### Configuration by application.properties
-> After setting `prefix` in `@ServerEndpoint`, then configurate by `application.properties`. for example：
+> You can get the configurate of `application.properties` by using `${...}` placeholders. for example：
 
-- first,set `prefix` 
+- first,use `${...}` in `@ServerEndpoint` 
 ```java
-@ServerEndpoint(prefix = "netty-websocket")
-@Component
+@ServerEndpoint(host = "${ws.host}",port = "${ws.port})
 public class MyWebSocket {
     ...
 }
 ```
 - then configurate in `application.properties`
 ```
-netty-websocket.host=0.0.0.0
-netty-websocket.path=/
-netty-websocket.port=80
+ws.host=0.0.0.0
+ws.port=80
 ```
-
-> The mapping of the key of `application.properties` and properties in `@ServerEndpoint`,following:
-
-| properties in `@ServerEndpoint` | key of `application.properties` | example
-|---|---|---
-|path|{prefix}.path|netty-websocket.path
-|host|{prefix}.host|netty-websocket.host
-|port|{prefix}.port|netty-websocket.port
-|bossLoopGroupThreads|{prefix}.boss-loop-group-threads|netty-websocket.boss-loop-group-threads
-|workerLoopGroupThreads|{prefix}.worker-loop-group-threads|netty-websocket.worker-loop-group-threads
-|useCompressionHandler|{prefix}.use-compression-handler|netty-websocket.use-compression-handler
-|optionConnectTimeoutMillis|{prefix}.option.connect-timeout-millis|netty-websocket.option.connect-timeout-millis
-|optionSoBacklog|{prefix}.option.so-backlog|netty-websocket.option.so-backlog
-|childOptionWriteSpinCount|{prefix}.child-option.write-spin-count|netty-websocket.child-option.write-spin-count
-|childOptionWriteBufferHighWaterMark|{prefix}.child-option.write-buffer-high-water-mark|netty-websocket.child-option.write-buffer-high-water-mark
-|childOptionWriteBufferLowWaterMark|{prefix}.child-option.write-buffer-low-water-mark|netty-websocket.child-option.write-buffer-low-water-mark
-|childOptionSoRcvbuf|{prefix}.child-option.so-rcvbuf|netty-websocket.child-option.so-rcvbuf
-|childOptionSoSndbuf|{prefix}.child-option.so-sndbuf|netty-websocket.child-option.so-sndbuf
-|childOptionTcpNodelay|{prefix}.child-option.tcp-nodelay|netty-websocket.child-option.tcp-nodelay
-|childOptionSoKeepalive|{prefix}.child-option.so-keepalive|netty-websocket.child-option.so-keepalive
-|childOptionSoLinger|{prefix}.child-option.so-linger|netty-websocket.child-option.so-linger
-|childOptionAllowHalfClosure|{prefix}.child-option.allow-half-closure|netty-websocket.child-option.allow-half-closure
-|readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
-|writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
-|allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
-|maxFramePayloadLength|{prefix}.max-frame-payload-length|netty-websocket.max-frame-payload-length
 
 ### Custom Favicon
 The way of configure favicon is the same as spring-boot.If `favicon.ico` is presented in the root of the classpath,it will be automatically used as the favicon of the application.the example is following:
@@ -225,4 +206,19 @@ src/
 - when multiple port of endpoint is 0 ,they will use the same random port
 - when multiple port of endpoint is the same as the path,host can't be set as "0.0.0.0",because it means it binds all of the addresses
 
+---
+### Change Log
 
+#### 0.8.0
+
+- Auto-Configuration
+
+#### 0.9.0
+
+- Support RESTful by `@PathVariable`
+- Get param by`@RequestParam` from query
+- Remove `ParameterMap` ,instead of `@RequestParam MultiValueMap`
+- Add `@BeforeHandshake` annotation，you can close the connect before handshake
+- Set sub-protocol in `@BeforeHandshake` event
+- Remove  the `@Component` on endpoint class
+- Update `Netty` version to `4.1.44.Final`

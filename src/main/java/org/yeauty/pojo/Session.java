@@ -21,8 +21,16 @@ public class Session {
 
     private final Channel channel;
 
-    public Session(Channel channel) {
+    Session(Channel channel) {
         this.channel = channel;
+    }
+
+    /**
+     * set subprotocols on {@link org.yeauty.annotation.BeforeHandshake}
+     * @param subprotocols
+     */
+    public void setSubprotocols(String subprotocols) {
+        setAttribute("subprotocols",subprotocols);
     }
 
     public ChannelFuture sendText(String message) {

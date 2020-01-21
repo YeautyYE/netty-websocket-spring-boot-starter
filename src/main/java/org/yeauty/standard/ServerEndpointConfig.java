@@ -16,7 +16,7 @@ public class ServerEndpointConfig {
 
     private final String HOST;
     private final int PORT;
-    private final Set<String> PATH_SET;
+//    private final Set<String> PATH_SET;
     private final int BOSS_LOOP_GROUP_THREADS;
     private final int WORKER_LOOP_GROUP_THREADS;
     private final boolean USE_COMPRESSION_HANDLER;
@@ -44,8 +44,8 @@ public class ServerEndpointConfig {
             this.HOST = host;
         }
         this.PORT = getAvailablePort(port);
-        PATH_SET = new HashSet<>();
-        addPath(path);
+//        PATH_SET = new HashSet<>();
+//        addPath(path);
         this.BOSS_LOOP_GROUP_THREADS = bossLoopGroupThreads;
         this.WORKER_LOOP_GROUP_THREADS = workerLoopGroupThreads;
         this.USE_COMPRESSION_HANDLER = useCompressionHandler;
@@ -67,7 +67,7 @@ public class ServerEndpointConfig {
     }
 
 
-    public String addPath(String path) {
+    /*public String addPath(String path) {
         if (StringUtils.isEmpty(path)) {
             path = "/";
         }
@@ -76,7 +76,7 @@ public class ServerEndpointConfig {
         }
         this.PATH_SET.add(path);
         return path;
-    }
+    }*/
 
     private int getAvailablePort(int port) {
         if (port != 0) {
@@ -110,10 +110,10 @@ public class ServerEndpointConfig {
         return PORT;
     }
 
-    public Set<String> getPathSet() {
+    /*public Set<String> getPathSet() {
 
         return PATH_SET;
-    }
+    }*/
 
     public int getBossLoopGroupThreads() {
         return BOSS_LOOP_GROUP_THREADS;

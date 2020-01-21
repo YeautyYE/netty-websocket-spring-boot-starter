@@ -1,37 +1,51 @@
 package org.yeauty.standard;
 
+import org.springframework.beans.TypeConverter;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
-import org.springframework.util.StringUtils;
 import org.yeauty.annotation.ServerEndpoint;
 import org.yeauty.exception.DeploymentException;
 import org.yeauty.pojo.PojoEndpointServer;
 import org.yeauty.pojo.PojoMethodMapping;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Yeauty
  * @version 1.0
  */
-public class ServerEndpointExporter extends ApplicationObjectSupport implements SmartInitializingSingleton {
+public class ServerEndpointExporter extends ApplicationObjectSupport implements SmartInitializingSingleton, BeanFactoryAware {
 
     @Autowired
     Environment environment;
+
+    private AbstractBeanFactory beanFactory;
 
     private final Map<InetSocketAddress, WebsocketServer> addressWebsocketServerMap = new HashMap<>();
 
     @Override
     public void afterSingletonsInstantiated() {
         registerEndpoints();
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        if (!(beanFactory instanceof AbstractBeanFactory)) {
+            throw new IllegalArgumentException(
+                    "AutowiredAnnotationBeanPostProcessor requires a AbstractBeanFactory: " + beanFactory);
+        }
+        this.beanFactory = (AbstractBeanFactory) beanFactory;
     }
 
     protected void registerEndpoints() {
@@ -57,6 +71,10 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             WebsocketServer websocketServer = entry.getValue();
             try {
                 websocketServer.init();
+                PojoEndpointServer pojoEndpointServer = websocketServer.getPojoEndpointServer();
+                StringJoiner stringJoiner = new StringJoiner(",");
+                pojoEndpointServer.getPathMatcherSet().forEach(pathMatcher -> stringJoiner.add("'" + pathMatcher.getPattern() + "'"));
+                logger.info("Netty WebSocket started on port: " + pojoEndpointServer.getPort() + " with context path(s): " + stringJoiner.toString());
             } catch (InterruptedException e) {
                 logger.error("websocket [" + entry.getKey() + "] init fail", e);
             }
@@ -73,152 +91,78 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         ApplicationContext context = getApplicationContext();
         PojoMethodMapping pojoMethodMapping = null;
         try {
-            pojoMethodMapping = new PojoMethodMapping(endpointClass, context);
+            pojoMethodMapping = new PojoMethodMapping(endpointClass, context, beanFactory);
         } catch (DeploymentException e) {
             throw new IllegalStateException("Failed to register ServerEndpointConfig: " + serverEndpointConfig, e);
         }
 
         InetSocketAddress inetSocketAddress = new InetSocketAddress(serverEndpointConfig.getHost(), serverEndpointConfig.getPort());
+        String path = resolveAnnotationValue(annotation.value(), String.class, "path");
+
         WebsocketServer websocketServer = addressWebsocketServerMap.get(inetSocketAddress);
         if (websocketServer == null) {
-            PojoEndpointServer pojoEndpointServer = new PojoEndpointServer(pojoMethodMapping, serverEndpointConfig);
+            PojoEndpointServer pojoEndpointServer = new PojoEndpointServer(pojoMethodMapping, serverEndpointConfig, path);
             websocketServer = new WebsocketServer(pojoEndpointServer, serverEndpointConfig);
             addressWebsocketServerMap.put(inetSocketAddress, websocketServer);
-
         } else {
-            String path = annotation.value();
-            String prefix = annotation.prefix();
-            if (!StringUtils.isEmpty(prefix)) {
-                String pathFromEnv = environment.getProperty(prefix + ".path", String.class);
-                if (pathFromEnv != null) {
-                    path = pathFromEnv;
-                }
-            }
             websocketServer.getPojoEndpointServer().addPathPojoMethodMapping(path, pojoMethodMapping);
         }
     }
 
     private ServerEndpointConfig buildConfig(ServerEndpoint annotation) {
-        String host = annotation.host();
-        int port = annotation.port();
-        String path = annotation.value();
-        int bossLoopGroupThreads = annotation.bossLoopGroupThreads();
-        int workerLoopGroupThreads = annotation.workerLoopGroupThreads();
-        boolean useCompressionHandler = annotation.useCompressionHandler();
+        String host = resolveAnnotationValue(annotation.host(), String.class, "host");
+        int port = resolveAnnotationValue(annotation.port(), Integer.class, "port");
+        String path = resolveAnnotationValue(annotation.value(), String.class, "value");
+        int bossLoopGroupThreads = resolveAnnotationValue(annotation.bossLoopGroupThreads(), Integer.class, "bossLoopGroupThreads");
+        int workerLoopGroupThreads = resolveAnnotationValue(annotation.workerLoopGroupThreads(), Integer.class, "workerLoopGroupThreads");
+        boolean useCompressionHandler = resolveAnnotationValue(annotation.useCompressionHandler(), Boolean.class, "useCompressionHandler");
 
-        int optionConnectTimeoutMillis = annotation.optionConnectTimeoutMillis();
-        int optionSoBacklog = annotation.optionSoBacklog();
+        int optionConnectTimeoutMillis = resolveAnnotationValue(annotation.optionConnectTimeoutMillis(), Integer.class, "optionConnectTimeoutMillis");
+        int optionSoBacklog = resolveAnnotationValue(annotation.optionSoBacklog(), Integer.class, "optionSoBacklog");
 
-        int childOptionWriteSpinCount = annotation.childOptionWriteSpinCount();
-        int childOptionWriteBufferHighWaterMark = annotation.childOptionWriteBufferHighWaterMark();
-        int childOptionWriteBufferLowWaterMark = annotation.childOptionWriteBufferLowWaterMark();
-        int childOptionSoRcvbuf = annotation.childOptionSoRcvbuf();
-        int childOptionSoSndbuf = annotation.childOptionSoSndbuf();
-        boolean childOptionTcpNodelay = annotation.childOptionTcpNodelay();
-        boolean childOptionSoKeepalive = annotation.childOptionSoKeepalive();
-        int childOptionSoLinger = annotation.childOptionSoLinger();
-        boolean childOptionAllowHalfClosure = annotation.childOptionAllowHalfClosure();
+        int childOptionWriteSpinCount = resolveAnnotationValue(annotation.childOptionWriteSpinCount(), Integer.class, "childOptionWriteSpinCount");
+        int childOptionWriteBufferHighWaterMark = resolveAnnotationValue(annotation.childOptionWriteBufferHighWaterMark(), Integer.class, "childOptionWriteBufferHighWaterMark");
+        int childOptionWriteBufferLowWaterMark = resolveAnnotationValue(annotation.childOptionWriteBufferLowWaterMark(), Integer.class, "childOptionWriteBufferLowWaterMark");
+        int childOptionSoRcvbuf = resolveAnnotationValue(annotation.childOptionSoRcvbuf(), Integer.class, "childOptionSoRcvbuf");
+        int childOptionSoSndbuf = resolveAnnotationValue(annotation.childOptionSoSndbuf(), Integer.class, "childOptionSoSndbuf");
+        boolean childOptionTcpNodelay = resolveAnnotationValue(annotation.childOptionTcpNodelay(), Boolean.class, "childOptionTcpNodelay");
+        boolean childOptionSoKeepalive = resolveAnnotationValue(annotation.childOptionSoKeepalive(), Boolean.class, "childOptionSoKeepalive");
+        int childOptionSoLinger = resolveAnnotationValue(annotation.childOptionSoLinger(), Integer.class, "childOptionSoLinger");
+        boolean childOptionAllowHalfClosure = resolveAnnotationValue(annotation.childOptionAllowHalfClosure(), Boolean.class, "childOptionAllowHalfClosure");
 
-        int readerIdleTimeSeconds = annotation.readerIdleTimeSeconds();
-        int writerIdleTimeSeconds = annotation.writerIdleTimeSeconds();
-        int allIdleTimeSeconds = annotation.allIdleTimeSeconds();
+        int readerIdleTimeSeconds = resolveAnnotationValue(annotation.readerIdleTimeSeconds(), Integer.class, "readerIdleTimeSeconds");
+        int writerIdleTimeSeconds = resolveAnnotationValue(annotation.writerIdleTimeSeconds(), Integer.class, "writerIdleTimeSeconds");
+        int allIdleTimeSeconds = resolveAnnotationValue(annotation.allIdleTimeSeconds(), Integer.class, "allIdleTimeSeconds");
 
-        int maxFramePayloadLength = annotation.maxFramePayloadLength();
+        int maxFramePayloadLength = resolveAnnotationValue(annotation.maxFramePayloadLength(), Integer.class, "maxFramePayloadLength");
 
-        String prefix = annotation.prefix();
-        if (!StringUtils.isEmpty(prefix)) {
-            String hostFromEnv = environment.getProperty(prefix + ".host", String.class);
-            if (hostFromEnv != null) {
-                host = hostFromEnv;
-            }
-            Integer portFromEnv = environment.getProperty(prefix + ".port", Integer.class);
-            if (portFromEnv != null) {
-                port = portFromEnv;
-            }
-            String pathFromEnv = environment.getProperty(prefix + ".path", String.class);
-            if (pathFromEnv != null) {
-                path = pathFromEnv;
-            }
-            Integer bossLoopGroupThreadsFromEnv = environment.getProperty(prefix + ".boss-loop-group-threads", Integer.class);
-            if (bossLoopGroupThreadsFromEnv != null) {
-                bossLoopGroupThreads = bossLoopGroupThreadsFromEnv;
-            }
-            Integer workerLoopGroupThreadsFromEnv = environment.getProperty(prefix + ".worker-loop-group-threads", Integer.class);
-            if (workerLoopGroupThreadsFromEnv != null) {
-                workerLoopGroupThreads = workerLoopGroupThreadsFromEnv;
-            }
-            Boolean useCompressionHandlerFromEnv = environment.getProperty(prefix + ".use-compression-handler", Boolean.class);
-            if (useCompressionHandlerFromEnv != null) {
-                useCompressionHandler = useCompressionHandlerFromEnv;
-            }
-            Integer optionConnectTimeoutMillisFromEnv = environment.getProperty(prefix + ".option.connect-timeout-millis", Integer.class);
-            if (optionConnectTimeoutMillisFromEnv != null) {
-                optionConnectTimeoutMillis = optionConnectTimeoutMillisFromEnv;
-            }
-            Integer optionSoBacklogFromEnv = environment.getProperty(prefix + ".option.so-backlog", Integer.class);
-            if (optionSoBacklogFromEnv != null) {
-                optionSoBacklog = optionSoBacklogFromEnv;
-            }
-            Integer childOptionWriteSpinCountFromEnv = environment.getProperty(prefix + ".child-option.write-spin-count", Integer.class);
-            if (childOptionWriteSpinCountFromEnv != null) {
-                childOptionWriteSpinCount = childOptionWriteSpinCountFromEnv;
-            }
-            Integer childOptionWriteBufferHighWaterMarkFromEnv = environment.getProperty(prefix + ".child-option.write-buffer-high-water-mark", Integer.class);
-            if (childOptionWriteBufferHighWaterMarkFromEnv != null) {
-                childOptionWriteBufferHighWaterMark = childOptionWriteBufferHighWaterMarkFromEnv;
-            }
-            Integer childOptionWriteBufferLowWaterMarkFromEnv = environment.getProperty(prefix + ".child-option.write-buffer-low-water-mark", Integer.class);
-            if (childOptionWriteBufferLowWaterMarkFromEnv != null) {
-                childOptionWriteBufferLowWaterMark = childOptionWriteBufferLowWaterMarkFromEnv;
-            }
-            Integer childOptionSoRcvbufFromEnv = environment.getProperty(prefix + ".child-option.so-rcvbuf", Integer.class);
-            if (childOptionSoRcvbufFromEnv != null) {
-                childOptionSoRcvbuf = childOptionSoRcvbufFromEnv;
-            }
-            Integer childOptionSoSndbufFromEnv = environment.getProperty(prefix + ".child-option.so-sndbuf", Integer.class);
-            if (childOptionSoSndbufFromEnv != null) {
-                childOptionSoSndbuf = childOptionSoSndbufFromEnv;
-            }
-            Boolean childOptionTcpNodelayFromEnv = environment.getProperty(prefix + ".child-option.tcp-nodelay", Boolean.class);
-            if (childOptionTcpNodelayFromEnv != null) {
-                childOptionTcpNodelay = childOptionTcpNodelayFromEnv;
-            }
-            Boolean childOptionSoKeepaliveFromEnv = environment.getProperty(prefix + ".child-option.so-keepalive", Boolean.class);
-            if (childOptionSoKeepaliveFromEnv != null) {
-                childOptionSoKeepalive = childOptionSoKeepaliveFromEnv;
-            }
-            Integer childOptionSoLingerFromEnv = environment.getProperty(prefix + ".child-option.so-linger", Integer.class);
-            if (childOptionSoLingerFromEnv != null) {
-                childOptionSoLinger = childOptionSoLingerFromEnv;
-            }
-            Boolean childOptionAllowHalfClosureFromEnv = environment.getProperty(prefix + ".child-option.allow-half-closure", Boolean.class);
-            if (childOptionAllowHalfClosureFromEnv != null) {
-                childOptionAllowHalfClosure = childOptionAllowHalfClosureFromEnv;
-            }
-            Integer readerIdleTimeSecondsFromEnv = environment.getProperty(prefix + ".reader-idle-time-seconds", Integer.class);
-            if (readerIdleTimeSecondsFromEnv != null) {
-                readerIdleTimeSeconds = readerIdleTimeSecondsFromEnv;
-            }
-            Integer writerIdleTimeSecondsFromEnv = environment.getProperty(prefix + ".writer-idle-time-seconds", Integer.class);
-            if (writerIdleTimeSecondsFromEnv != null) {
-                writerIdleTimeSeconds = writerIdleTimeSecondsFromEnv;
-            }
-            Integer allIdleTimeSecondsFromEnv = environment.getProperty(prefix + ".all-idle-time-seconds", Integer.class);
-            if (allIdleTimeSecondsFromEnv != null) {
-                allIdleTimeSeconds = allIdleTimeSecondsFromEnv;
-            }
-            Integer maxFramePayloadLengthEnv = environment.getProperty(prefix + ".max-frame-payload-length", Integer.class);
-            if (maxFramePayloadLengthEnv != null) {
-                maxFramePayloadLength = maxFramePayloadLengthEnv;
-            }
-        }
-
-        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, bossLoopGroupThreads, workerLoopGroupThreads, useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark, childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive, childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds,maxFramePayloadLength);
+        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, bossLoopGroupThreads, workerLoopGroupThreads, useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark, childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive, childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds, maxFramePayloadLength);
         return serverEndpointConfig;
     }
 
-    public Set<InetSocketAddress> getInetSocketAddressSet() {
-        return addressWebsocketServerMap.keySet();
+    private <T> T resolveAnnotationValue(Object value, Class<T> requiredType, String paramName) {
+        if (value == null) {
+            return null;
+        }
+        TypeConverter typeConverter = beanFactory.getTypeConverter();
+        if (typeConverter == null) {
+            throw new IllegalArgumentException(
+                    "TypeConverter of AbstractBeanFactory is null: " + beanFactory);
+        }
+        if (value instanceof String) {
+            String strVal = beanFactory.resolveEmbeddedValue((String) value);
+            BeanExpressionResolver beanExpressionResolver = beanFactory.getBeanExpressionResolver();
+            if (beanExpressionResolver != null) {
+                value = beanExpressionResolver.evaluate(strVal, new BeanExpressionContext(beanFactory, null));
+            } else {
+                value = strVal;
+            }
+        }
+        try {
+            return typeConverter.convertIfNecessary(value, requiredType);
+        } catch (TypeMismatchException e) {
+            throw new IllegalArgumentException("Failed to convert value of parameter '" + paramName + "' to required type '" + requiredType.getName() + "'");
+        }
     }
 
 }

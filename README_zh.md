@@ -18,23 +18,29 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.8.0</version>
+		<version>0.9.0</version>
 	</dependency>
 ```
 
-- 在端点类上加上`@ServerEndpoint`、`@Component`注解，并在相应的方法上加上`@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`@OnEvent`注解，样例如下：
+- 在端点类上加上`@ServerEndpoint`注解，并在相应的方法上加上`@BeforeHandshake`、`@OnOpen`、`@OnClose`、`@OnError`、`@OnMessage`、`@OnBinary`、`@OnEvent`注解，样例如下：
 
 ```java
-@ServerEndpoint
-@Component
+@ServerEndpoint(path = "/ws/{arg}")
 public class MyWebSocket {
 
+    @BeforeHandshake
+    public void handshake(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
+        session.setSubprotocols("stomp");
+        if (!req.equals("ok")){
+            System.out.println("Authentication failed!");
+            session.close();
+        }
+    }
+    
     @OnOpen
-    public void onOpen(Session session, HttpHeaders headers, ParameterMap parameterMap) throws IOException {
+    public void onOpen(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
         System.out.println("new connection");
-        
-        String paramValue = parameterMap.getParameter("paramKey");
-        System.out.println(paramValue);
+        System.out.println(req);
     }
 
     @OnClose
@@ -84,7 +90,7 @@ public class MyWebSocket {
 }
 ```
 
-- 打开WebSocket客户端，连接到`ws://127.0.0.1:80`
+- 打开WebSocket客户端，连接到`ws://127.0.0.1:80/ws/xxx`
 
 
 ### 注解
@@ -93,9 +99,13 @@ public class MyWebSocket {
 > 被注解的类将被注册成为一个WebSocket端点
 > 所有的[配置项](#%E9%85%8D%E7%BD%AE)都在这个注解的属性中 ( 如:`@ServerEndpoint("/ws")` )
 
+###### @BeforeHandshake 
+> 当有新的连接进入时，对该方法进行回调
+> 注入参数的类型:Session、HttpHeaders...
+
 ###### @OnOpen 
-> 当有新的WebSocket连接进入时，对该方法进行回调
-> 注入参数的类型:Session、HttpHeaders、ParameterMap
+> 当有新的WebSocket连接完成时，对该方法进行回调
+> 注入参数的类型:Session、HttpHeaders...
 
 ###### @OnClose
 > 当有WebSocket连接关闭时，对该方法进行回调
@@ -146,48 +156,20 @@ public class MyWebSocket {
 |maxFramePayloadLength|65536|最大允许帧载荷长度
 
 ### 通过application.properties进行配置
-> 对注解中的`prefix`进行设置后，即可在`application.properties`中进行配置。如下：
+> 所有参数皆可使用`${...}`占位符获取`application.properties`中的配置。如下：
 
-- 首先在ServerEndpoint注解中设置prefix的值
+- 首先在`@ServerEndpoint`注解的属性中使用`${...}`占位符
 ```java
-@ServerEndpoint(prefix = "netty-websocket")
-@Component
+@ServerEndpoint(host = "${ws.host}",port = "${ws.port})
 public class MyWebSocket {
     ...
 }
 ```
 - 接下来即可在`application.properties`中配置
 ```
-netty-websocket.host=0.0.0.0
-netty-websocket.path=/
-netty-websocket.port=80
+ws.host=0.0.0.0
+ws.port=80
 ```
-
-> `application.properties`中的key与注解`@ServerEndpoint`中属性的对应关系如下:
-
-| 注解中的属性 | 配置文件中的key | 例子
-|---|---|---
-|path|{prefix}.path|netty-websocket.path
-|host|{prefix}.host|netty-websocket.host
-|port|{prefix}.port|netty-websocket.port
-|bossLoopGroupThreads|{prefix}.boss-loop-group-threads|netty-websocket.boss-loop-group-threads
-|workerLoopGroupThreads|{prefix}.worker-loop-group-threads|netty-websocket.worker-loop-group-threads
-|useCompressionHandler|{prefix}.use-compression-handler|netty-websocket.use-compression-handler
-|optionConnectTimeoutMillis|{prefix}.option.connect-timeout-millis|netty-websocket.option.connect-timeout-millis
-|optionSoBacklog|{prefix}.option.so-backlog|netty-websocket.option.so-backlog
-|childOptionWriteSpinCount|{prefix}.child-option.write-spin-count|netty-websocket.child-option.write-spin-count
-|childOptionWriteBufferHighWaterMark|{prefix}.child-option.write-buffer-high-water-mark|netty-websocket.child-option.write-buffer-high-water-mark
-|childOptionWriteBufferLowWaterMark|{prefix}.child-option.write-buffer-low-water-mark|netty-websocket.child-option.write-buffer-low-water-mark
-|childOptionSoRcvbuf|{prefix}.child-option.so-rcvbuf|netty-websocket.child-option.so-rcvbuf
-|childOptionSoSndbuf|{prefix}.child-option.so-sndbuf|netty-websocket.child-option.so-sndbuf
-|childOptionTcpNodelay|{prefix}.child-option.tcp-nodelay|netty-websocket.child-option.tcp-nodelay
-|childOptionSoKeepalive|{prefix}.child-option.so-keepalive|netty-websocket.child-option.so-keepalive
-|childOptionSoLinger|{prefix}.child-option.so-linger|netty-websocket.child-option.so-linger
-|childOptionAllowHalfClosure|{prefix}.child-option.allow-half-closure|netty-websocket.child-option.allow-half-closure
-|readerIdleTimeSeconds|{prefix}.reader-idle-time-seconds|netty-websocket.reader-idle-time-seconds
-|writerIdleTimeSeconds|{prefix}.writer-idle-time-seconds|netty-websocket.writer-idle-time-seconds
-|allIdleTimeSeconds|{prefix}.all-idle-time-seconds|netty-websocket.all-idle-time-seconds
-|maxFramePayloadLength|{prefix}.max-frame-payload-length|netty-websocket.max-frame-payload-length
 
 ### 自定义Favicon
 配置favicon的方式与spring-boot中完全一致。只需将`favicon.ico`文件放到classpath的根目录下即可。如下:
@@ -223,5 +205,20 @@ src/
 - 当多个端点服务的port为0时，将使用同一个随机的端口号
 - 当多个端点的port和path相同时，host不能设为`"0.0.0.0"`，因为`"0.0.0.0"`意味着绑定所有的host
 
+---
+### 更新日志
 
+#### 0.8.0
+
+- 自动装配
+
+#### 0.9.0
+
+- 通过`@PathVariable`支持RESTful风格中获取参数
+- 通过`@RequestParam`实现请求中query的获取参数
+- 移除原来的ParameterMap,用`@RequestParam MultiValueMap`代替
+- 新增 `@BeforeHandshake` 注解，可在握手之前对连接进行关闭
+- 在`@BeforeHandshake`事件中可设置子协议
+- 去掉配置端点类上的 `@Component`
+- 更新`Netty`版本到 `4.1.44.Final`
 
