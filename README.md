@@ -138,7 +138,6 @@ public class MyWebSocket {
 |bossLoopGroupThreads|0|num of threads in bossEventLoopGroup
 |workerLoopGroupThreads|0|num of threads in workerEventLoopGroup
 |useCompressionHandler|false|whether add WebSocketServerCompressionHandler to pipeline
-|prefix|""|configuration by application.properties when it is empty，details can be find in [Configuration-by-application.properties](#configuration-by-application.properties)
 |optionConnectTimeoutMillis|30000|the same as `ChannelOption.CONNECT_TIMEOUT_MILLIS` in Netty
 |optionSoBacklog|128|the same as `ChannelOption.SO_BACKLOG` in Netty
 |childOptionWriteSpinCount|16|the same as `ChannelOption.WRITE_SPIN_COUNT` in Netty

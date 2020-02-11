@@ -138,7 +138,6 @@ public class MyWebSocket {
 |bossLoopGroupThreads|0|bossEventLoopGroup的线程数
 |workerLoopGroupThreads|0|workerEventLoopGroup的线程数
 |useCompressionHandler|false|是否添加WebSocketServerCompressionHandler到pipeline
-|prefix|""|当不为空时，即是使用application.properties进行配置，详情在 [通过application.properties进行配置](#%E9%80%9A%E8%BF%87APPLICATION.PROPERTIES%E8%BF%9B%E8%A1%8C%E9%85%8D%E7%BD%AE)
 |optionConnectTimeoutMillis|30000|与Netty的`ChannelOption.CONNECT_TIMEOUT_MILLIS`一致
 |optionSoBacklog|128|与Netty的`ChannelOption.SO_BACKLOG`一致
 |childOptionWriteSpinCount|16|与Netty的`ChannelOption.WRITE_SPIN_COUNT`一致
