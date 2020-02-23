@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.0</version>
+		<version>0.9.1</version>
 	</dependency>
 ```
 
@@ -221,3 +221,7 @@ src/
 - Set sub-protocol in `@BeforeHandshake` event
 - Remove  the `@Component` on endpoint class
 - Update `Netty` version to `4.1.44.Final`
+
+#### 0.9.1
+
+- bug fixed; when use `@RequestParam MultiValueMap` to get value, it was null

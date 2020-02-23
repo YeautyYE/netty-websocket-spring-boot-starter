@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.0</version>
+		<version>0.9.1</version>
 	</dependency>
 ```
 
@@ -221,3 +221,6 @@ src/
 - 去掉配置端点类上的 `@Component`
 - 更新`Netty`版本到 `4.1.44.Final`
 
+#### 0.9.1
+
+- 修复bug;当使用`@RequestParam MultiValueMap`时获取的对象为null
