@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.1</version>
+		<version>0.9.2</version>
 	</dependency>
 ```
 
@@ -223,4 +223,8 @@ src/
 
 #### 0.9.1
 
-- 修复bug;当使用`@RequestParam MultiValueMap`时获取的对象为null
+- 修复bug：当使用`@RequestParam MultiValueMap`时获取的对象为null
+
+#### 0.9.2
+
+- 兼容 0.8.0 以下版本，可以手动装配`ServerEndpointExporter`对象

@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.1</version>
+		<version>0.9.2</version>
 	</dependency>
 ```
 
@@ -224,4 +224,8 @@ src/
 
 #### 0.9.1
 
-- bug fixed; when use `@RequestParam MultiValueMap` to get value, it was null
+- Bug fixed : it was null when using `@RequestParam MultiValueMap` to get value
+
+#### 0.9.2
+
+-  There are compatibility version under 0.8.0 that can configure the `ServerEndpointExporter` manully 
