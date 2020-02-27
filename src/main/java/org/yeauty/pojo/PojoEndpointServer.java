@@ -92,6 +92,8 @@ public class PojoEndpointServer {
                 logger.error(e);
                 return;
             }
+            Session session = new Session(channel);
+            channel.attr(SESSION_KEY).set(session);
         }
 
         Method onOpenMethod = methodMapping.getOnOpen();

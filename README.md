@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.3</version>
+		<version>0.9.4</version>
 	</dependency>
 ```
 
@@ -234,3 +234,7 @@ src/
 #### 0.9.3
 
 - Bug fixed ：when there is no  `@BeforeHandshake` , NullPointerException will appear
+
+#### 0.9.4
+
+- Bug fixed ：when there is no  `@BeforeHandshake` , `Session` in `OnOpen` is null.
