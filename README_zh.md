@@ -224,6 +224,7 @@ src/
 #### 0.9.1
 
 - 修复bug：当使用`@RequestParam MultiValueMap`时获取的对象为null
+- 更新`Netty`版本到 `4.1.45.Final`
 
 #### 0.9.2
 

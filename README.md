@@ -225,6 +225,7 @@ src/
 #### 0.9.1
 
 - Bug fixed : it was null when using `@RequestParam MultiValueMap` to get value
+- Update `Netty` version to `4.1.45.Final`
 
 #### 0.9.2
 
