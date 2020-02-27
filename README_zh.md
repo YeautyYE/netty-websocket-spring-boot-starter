@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.2</version>
+		<version>0.9.3</version>
 	</dependency>
 ```
 
@@ -228,3 +228,7 @@ src/
 #### 0.9.2
 
 - 兼容 0.8.0 以下版本，可以手动装配`ServerEndpointExporter`对象
+
+#### 0.9.3
+
+- 修复bug：当没有 `@BeforeHandshake`时会出现空指针异常

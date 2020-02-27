@@ -84,6 +84,16 @@ public class PojoEndpointServer {
         PojoMethodMapping methodMapping = getPojoMethodMapping(path, channel);
 
         Object implement = channel.attr(POJO_KEY).get();
+        if (implement==null){
+            try {
+                implement = methodMapping.getEndpointInstance();
+                channel.attr(POJO_KEY).set(implement);
+            } catch (Exception e) {
+                logger.error(e);
+                return;
+            }
+        }
+
         Method onOpenMethod = methodMapping.getOnOpen();
         if (onOpenMethod != null) {
             try {
