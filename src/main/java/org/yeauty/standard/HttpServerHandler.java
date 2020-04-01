@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
@@ -226,6 +227,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             if (config.isUseCompressionHandler()) {
                 pipeline.addLast(new WebSocketServerCompressionHandler());
             }
+            pipeline.addLast(new WebSocketFrameAggregator(Integer.MAX_VALUE));
             pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
             String finalPattern = pattern;
             handshaker.handshake(channel, req).addListener(future -> {

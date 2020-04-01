@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.4</version>
+		<version>0.9.5</version>
 	</dependency>
 ```
 
@@ -237,3 +237,7 @@ src/
 #### 0.9.4
 
 - 修复bug：当没有 `@BeforeHandshake`时 `OnOpen`中的`Session`为null.
+
+#### 0.9.5
+
+- 修复bug：`OnError`事件中的`Throwable`为null.

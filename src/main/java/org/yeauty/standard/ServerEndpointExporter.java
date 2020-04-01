@@ -74,9 +74,9 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
                 PojoEndpointServer pojoEndpointServer = websocketServer.getPojoEndpointServer();
                 StringJoiner stringJoiner = new StringJoiner(",");
                 pojoEndpointServer.getPathMatcherSet().forEach(pathMatcher -> stringJoiner.add("'" + pathMatcher.getPattern() + "'"));
-                logger.info("Netty WebSocket started on port: " + pojoEndpointServer.getPort() + " with context path(s): " + stringJoiner.toString());
+                logger.info(String.format("\033[34mNetty WebSocket started on port: %s with context path(s): %s .\033[0m", pojoEndpointServer.getPort(), stringJoiner.toString()));
             } catch (InterruptedException e) {
-                logger.error("websocket [" + entry.getKey() + "] init fail", e);
+                logger.error(String.format("websocket [%s] init fail", entry.getKey()), e);
             }
         }
     }
@@ -145,10 +145,7 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
             return null;
         }
         TypeConverter typeConverter = beanFactory.getTypeConverter();
-        if (typeConverter == null) {
-            throw new IllegalArgumentException(
-                    "TypeConverter of AbstractBeanFactory is null: " + beanFactory);
-        }
+
         if (value instanceof String) {
             String strVal = beanFactory.resolveEmbeddedValue((String) value);
             BeanExpressionResolver beanExpressionResolver = beanFactory.getBeanExpressionResolver();

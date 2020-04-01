@@ -12,6 +12,9 @@ public class ThrowableMethodArgumentResolver implements MethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, Channel channel, Object object) throws Exception {
+        if (object instanceof Throwable) {
+            return object;
+        }
         return null;
     }
 }

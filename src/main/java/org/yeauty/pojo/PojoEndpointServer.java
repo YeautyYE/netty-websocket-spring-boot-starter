@@ -34,8 +34,6 @@ public class PojoEndpointServer {
 
     public static final AttributeKey<Map<String, List<String>>> REQUEST_PARAM = AttributeKey.valueOf("WEBSOCKET_REQUEST_PARAM");
 
-    public static final AttributeKey<HttpHeaders> HEADERS = AttributeKey.valueOf("WEBSOCKET_HEADERS");
-
     private final Map<String, PojoMethodMapping> pathMethodMappingMap = new HashMap<>();
 
     private final ServerEndpointConfig config;
@@ -149,7 +147,6 @@ public class PojoEndpointServer {
                 return;
             }
             Object implement = channel.attr(POJO_KEY).get();
-            Session session = channel.attr(SESSION_KEY).get();
             try {
                 Method method = methodMapping.getOnError();
                 Object[] args = methodMapping.getOnErrorArgs(channel, throwable);
