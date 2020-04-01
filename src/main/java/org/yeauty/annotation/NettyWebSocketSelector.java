@@ -10,7 +10,7 @@ import org.yeauty.standard.ServerEndpointExporter;
 public class NettyWebSocketSelector {
 
     @Bean
-    public ServerEndpointExporter serverEndpointExporter22() {
+    public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
     }
 }
