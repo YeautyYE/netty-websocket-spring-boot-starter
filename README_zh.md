@@ -31,7 +31,7 @@ public class MyWebSocket {
     @BeforeHandshake
     public void handshake(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
         session.setSubprotocols("stomp");
-        if (!req.equals("ok")){
+        if (!"ok".equals(req)){
             System.out.println("Authentication failed!");
             session.close();
         }
