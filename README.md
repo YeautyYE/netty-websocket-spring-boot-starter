@@ -37,7 +37,7 @@ public class MyWebSocket {
         }
     }
     
-    @OnOpen
+    @OnOpen 
     public void onOpen(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
         System.out.println("new connection");
         System.out.println(req);
