@@ -64,6 +64,8 @@ public class PojoMethodMapping {
         Method event = null;
         Method[] pojoClazzMethods = null;
         Class<?> currentClazz = pojoClazz;
+        ServerEndpoint serverEndpoint = currentClazz.getAnnotation(ServerEndpoint.class);
+        boolean allowNonOverriddenMethods = "true".equals(serverEndpoint.allowNonOverriddenMethods());
         while (!currentClazz.equals(Object.class)) {
             Method[] currentClazzMethods = currentClazz.getDeclaredMethods();
             if (currentClazz == pojoClazz) {
@@ -76,6 +78,7 @@ public class PojoMethodMapping {
                         handshake = method;
                     } else {
                         if (currentClazz == pojoClazz ||
+                                !allowNonOverriddenMethods &&
                                 !isMethodOverride(handshake, method)) {
                             // Duplicate annotation
                             throw new DeploymentException(
@@ -88,6 +91,7 @@ public class PojoMethodMapping {
                         open = method;
                     } else {
                         if (currentClazz == pojoClazz ||
+                                !allowNonOverriddenMethods &&
                                 !isMethodOverride(open, method)) {
                             // Duplicate annotation
                             throw new DeploymentException(
@@ -100,6 +104,7 @@ public class PojoMethodMapping {
                         close = method;
                     } else {
                         if (currentClazz == pojoClazz ||
+                                !allowNonOverriddenMethods &&
                                 !isMethodOverride(close, method)) {
                             // Duplicate annotation
                             throw new DeploymentException(
@@ -112,6 +117,7 @@ public class PojoMethodMapping {
                         error = method;
                     } else {
                         if (currentClazz == pojoClazz ||
+                                !allowNonOverriddenMethods &&
                                 !isMethodOverride(error, method)) {
                             // Duplicate annotation
                             throw new DeploymentException(
@@ -124,6 +130,7 @@ public class PojoMethodMapping {
                         message = method;
                     } else {
                         if (currentClazz == pojoClazz ||
+                                !allowNonOverriddenMethods &&
                                 !isMethodOverride(message, method)) {
                             // Duplicate annotation
                             throw new DeploymentException(
@@ -136,6 +143,7 @@ public class PojoMethodMapping {
                         binary = method;
                     } else {
                         if (currentClazz == pojoClazz ||
+                                !allowNonOverriddenMethods &&
                                 !isMethodOverride(binary, method)) {
                             // Duplicate annotation
                             throw new DeploymentException(
@@ -148,6 +156,7 @@ public class PojoMethodMapping {
                         event = method;
                     } else {
                         if (currentClazz == pojoClazz ||
+                                !allowNonOverriddenMethods &&
                                 !isMethodOverride(event, method)) {
                             // Duplicate annotation
                             throw new DeploymentException(

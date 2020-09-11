@@ -71,4 +71,8 @@ public @interface ServerEndpoint {
 
     String maxFramePayloadLength() default "65536";
 
+    //------------------------- Application settings -------------------------
+
+    String allowNonOverriddenMethods() default "false";
+
 }

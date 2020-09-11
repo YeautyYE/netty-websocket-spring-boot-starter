@@ -153,6 +153,7 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|与`IdleStateHandler`中的`writerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |allIdleTimeSeconds|0|与`IdleStateHandler`中的`allIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |maxFramePayloadLength|65536|最大允许帧载荷长度
+|allowNonOverriddenMethods|false|是否允许ServerEndPoint子类的非重写方法覆盖父类方法
 
 ### 通过application.properties进行配置
 > 所有参数皆可使用`${...}`占位符获取`application.properties`中的配置。如下：

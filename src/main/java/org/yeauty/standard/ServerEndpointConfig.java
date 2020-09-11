@@ -35,9 +35,10 @@ public class ServerEndpointConfig {
     private final int WRITER_IDLE_TIME_SECONDS;
     private final int ALL_IDLE_TIME_SECONDS;
     private final int MAX_FRAME_PAYLOAD_LENGTH;
+    private final boolean ALLOW_NON_OVERRIDDEN_METHODS;
     private static Integer randomPort;
 
-    public ServerEndpointConfig(String host, int port, String path, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds, int maxFramePayloadLength) {
+    public ServerEndpointConfig(String host, int port, String path, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds, int maxFramePayloadLength,boolean allowNonOverriddenMethods) {
         if (StringUtils.isEmpty(host) || "0.0.0.0".equals(host) || "0.0.0.0/0.0.0.0".equals(host)) {
             this.HOST = "0.0.0.0";
         } else {
@@ -64,6 +65,7 @@ public class ServerEndpointConfig {
         this.WRITER_IDLE_TIME_SECONDS = writerIdleTimeSeconds;
         this.ALL_IDLE_TIME_SECONDS = allIdleTimeSeconds;
         this.MAX_FRAME_PAYLOAD_LENGTH = maxFramePayloadLength;
+        this.ALLOW_NON_OVERRIDDEN_METHODS=allowNonOverriddenMethods;
     }
 
 
@@ -187,7 +189,11 @@ public class ServerEndpointConfig {
         return ALL_IDLE_TIME_SECONDS;
     }
 
-    public int getmaxFramePayloadLength() {
+    public int getMaxFramePayloadLength() {
         return MAX_FRAME_PAYLOAD_LENGTH;
+    }
+
+    public boolean getAllowNonOverriddenMethods(){
+        return ALLOW_NON_OVERRIDDEN_METHODS;
     }
 }

@@ -153,6 +153,7 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|the same as `writerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |allIdleTimeSeconds|0|the same as `allIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |maxFramePayloadLength|65536|Maximum allowable frame payload length.
+|allowNonOverriddenMethods|false|Whether to allow non-overridden methods of ServerEndPoint subclasses to override parent methods
 
 ### Configuration by application.properties
 > You can get the configurate of `application.properties` by using `${...}` placeholders. for example：
