@@ -9,11 +9,11 @@ import java.util.Map;
 
 import static org.yeauty.pojo.PojoEndpointServer.URI_TEMPLATE;
 
-public class AntPathMatcherWraaper extends AntPathMatcher implements WsPathMatcher {
+public class AntPathMatcherWrapper extends AntPathMatcher implements WsPathMatcher {
 
     private String pattern;
 
-    public AntPathMatcherWraaper(String pattern) {
+    public AntPathMatcherWrapper(String pattern) {
         this.pattern = pattern;
     }
 
