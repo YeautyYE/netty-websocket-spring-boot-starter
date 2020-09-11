@@ -1,9 +1,7 @@
 package org.yeauty.pojo;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
@@ -235,7 +233,7 @@ public class PojoEndpointServer {
         pathMethodMappingMap.put(path, pojoMethodMapping);
         for (MethodArgumentResolver onOpenArgResolver : pojoMethodMapping.getOnOpenArgResolvers()) {
             if (onOpenArgResolver instanceof PathVariableMethodArgumentResolver || onOpenArgResolver instanceof PathVariableMapMethodArgumentResolver) {
-                pathMatchers.add(new AntPathMatcherWraaper(path));
+                pathMatchers.add(new AntPathMatcherWrapper(path));
                 return;
             }
         }
