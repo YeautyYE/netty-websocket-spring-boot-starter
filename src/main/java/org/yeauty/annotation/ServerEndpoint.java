@@ -27,7 +27,7 @@ public @interface ServerEndpoint {
 
     String port() default "80";
 
-    String bossLoopGroupThreads() default "0";
+    String bossLoopGroupThreads() default "1";
 
     String workerLoopGroupThreads() default "0";
 
