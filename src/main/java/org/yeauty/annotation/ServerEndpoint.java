@@ -71,4 +71,10 @@ public @interface ServerEndpoint {
 
     String maxFramePayloadLength() default "65536";
 
+    //------------------------- eventExecutorGroup -------------------------
+
+    String useEventExecutorGroup() default "false"; //use EventExecutorGroup(another thread pool) to perform time-consuming synchronous business logic
+
+    String eventExecutorGroupThreads() default "16";
+
 }

@@ -153,6 +153,8 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|the same as `writerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |allIdleTimeSeconds|0|the same as `allIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |maxFramePayloadLength|65536|Maximum allowable frame payload length.
+|useEventExecutorGroup|false|Whether to use another thread pool to perform time-consuming synchronous business logic
+|eventExecutorGroupThreads|16|num of threads in bossEventLoopGroup
 
 ### Configuration by application.properties
 > You can get the configurate of `application.properties` by using `${...}` placeholders. for example：
@@ -242,3 +244,8 @@ src/
 #### 0.9.5
 
 - Bug fixed ：`Throwable` in `OnError` event  is null.
+
+#### 0.10.0
+
+- Modified the default value of `bossLoopGroupThreads` to 1
+- Supports configuring `useEventExecutorGroup` to run synchronous and time-consuming business logic in EventExecutorGroup, so that the I/O thread is not blocked by a time-consuming task.

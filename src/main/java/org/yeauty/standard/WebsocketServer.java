@@ -9,6 +9,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.yeauty.pojo.PojoEndpointServer;
 
 import java.net.BindException;
@@ -32,9 +34,14 @@ public class WebsocketServer {
     }
 
     public void init() throws InterruptedException {
+        EventExecutorGroup eventExecutorGroup = null;
+        if (config.isUseEventExecutorGroup()){
+            eventExecutorGroup = new DefaultEventExecutorGroup(config.getEventExecutorGroupThreads() == 0 ? 16 : config.getEventExecutorGroupThreads());
+        }
         EventLoopGroup boss = new NioEventLoopGroup(config.getBossLoopGroupThreads());
         EventLoopGroup worker = new NioEventLoopGroup(config.getWorkerLoopGroupThreads());
         ServerBootstrap bootstrap = new ServerBootstrap();
+        EventExecutorGroup finalEventExecutorGroup = eventExecutorGroup;
         bootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeoutMillis())
@@ -52,7 +59,7 @@ public class WebsocketServer {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast(new HttpServerCodec());
                         pipeline.addLast(new HttpObjectAggregator(65536));
-                        pipeline.addLast(new HttpServerHandler(pojoEndpointServer, config));
+                        pipeline.addLast(new HttpServerHandler(pojoEndpointServer, config, finalEventExecutorGroup));
                     }
                 });
 

@@ -153,6 +153,8 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|与`IdleStateHandler`中的`writerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |allIdleTimeSeconds|0|与`IdleStateHandler`中的`allIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |maxFramePayloadLength|65536|最大允许帧载荷长度
+|useEventExecutorGroup|false|是否使用另一个线程池来执行耗时的同步业务逻辑
+|eventExecutorGroupThreads|16|eventExecutorGroup的线程数
 
 ### 通过application.properties进行配置
 > 所有参数皆可使用`${...}`占位符获取`application.properties`中的配置。如下：
@@ -241,3 +243,8 @@ src/
 #### 0.9.5
 
 - 修复bug：`OnError`事件中的`Throwable`为null.
+
+#### 0.10.0
+
+- 修改`bossLoopGroupThreads`默认值为1
+- 支持通过配置`useEventExecutorGroup`让同步且耗时的业务逻辑在EventExecutorGroup中执行，防止I/O线程被耗时的任务阻塞
