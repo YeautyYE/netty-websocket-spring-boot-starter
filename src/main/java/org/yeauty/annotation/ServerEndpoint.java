@@ -73,7 +73,7 @@ public @interface ServerEndpoint {
 
     //------------------------- eventExecutorGroup -------------------------
 
-    String useEventExecutorGroup() default "false"; //use EventExecutorGroup(another thread pool) to perform time-consuming synchronous business logic
+    String useEventExecutorGroup() default "true"; //use EventExecutorGroup(another thread pool) to perform time-consuming synchronous business logic
 
     String eventExecutorGroupThreads() default "16";
 

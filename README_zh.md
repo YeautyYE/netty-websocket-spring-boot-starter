@@ -153,7 +153,7 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|与`IdleStateHandler`中的`writerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |allIdleTimeSeconds|0|与`IdleStateHandler`中的`allIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |maxFramePayloadLength|65536|最大允许帧载荷长度
-|useEventExecutorGroup|false|是否使用另一个线程池来执行耗时的同步业务逻辑
+|useEventExecutorGroup|true|是否使用另一个线程池来执行耗时的同步业务逻辑
 |eventExecutorGroupThreads|16|eventExecutorGroup的线程数
 
 ### 通过application.properties进行配置

@@ -153,7 +153,7 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|the same as `writerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |allIdleTimeSeconds|0|the same as `allIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |maxFramePayloadLength|65536|Maximum allowable frame payload length.
-|useEventExecutorGroup|false|Whether to use another thread pool to perform time-consuming synchronous business logic
+|useEventExecutorGroup|true|Whether to use another thread pool to perform time-consuming synchronous business logic
 |eventExecutorGroupThreads|16|num of threads in bossEventLoopGroup
 
 ### Configuration by application.properties
