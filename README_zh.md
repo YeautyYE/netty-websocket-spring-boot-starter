@@ -248,3 +248,4 @@ src/
 
 - 修改`bossLoopGroupThreads`默认值为1
 - 支持通过配置`useEventExecutorGroup`让同步且耗时的业务逻辑在EventExecutorGroup中执行，防止I/O线程被耗时的任务阻塞
+- 支持SSL

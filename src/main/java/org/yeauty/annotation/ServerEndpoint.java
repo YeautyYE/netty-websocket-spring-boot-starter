@@ -77,4 +77,20 @@ public @interface ServerEndpoint {
 
     String eventExecutorGroupThreads() default "16";
 
+    //------------------------- ssl (refer to spring) -------------------------
+
+    String sslKeyPassword() default "";
+
+    String sslKeyStore() default "";            //e.g. classpath:server.jks
+
+    String sslKeyStorePassword() default "";
+
+    String sslKeyStoreType() default "";        //e.g. JKS
+
+    String sslTrustStore() default "";
+
+    String sslTrustStorePassword() default "";
+
+    String sslTrustStoreType() default "";
+
 }

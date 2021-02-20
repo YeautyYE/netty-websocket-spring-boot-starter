@@ -9,10 +9,17 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.springframework.util.StringUtils;
 import org.yeauty.pojo.PojoEndpointServer;
+import org.yeauty.util.SslUtils;
 
+import javax.net.ssl.SSLException;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -28,14 +35,25 @@ public class WebsocketServer {
 
     private final ServerEndpointConfig config;
 
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(WebsocketServer.class);
+
     public WebsocketServer(PojoEndpointServer webSocketServerHandler, ServerEndpointConfig serverEndpointConfig) {
         this.pojoEndpointServer = webSocketServerHandler;
         this.config = serverEndpointConfig;
+
     }
 
-    public void init() throws InterruptedException {
+    public void init() throws InterruptedException, SSLException {
         EventExecutorGroup eventExecutorGroup = null;
-        if (config.isUseEventExecutorGroup()){
+        final SslContext sslCtx;
+        if (!StringUtils.isEmpty(config.getKeyStore())) {
+            sslCtx = SslUtils.createSslContext(config.getKeyPassword(), config.getKeyStore(), config.getKeyStoreType(), config.getKeyStorePassword(), config.getTrustStore(), config.getTrustStoreType(), config.getTrustStorePassword());
+        } else {
+            sslCtx = null;
+        }
+
+        if (config.isUseEventExecutorGroup()) {
             eventExecutorGroup = new DefaultEventExecutorGroup(config.getEventExecutorGroupThreads() == 0 ? 16 : config.getEventExecutorGroupThreads());
         }
         EventLoopGroup boss = new NioEventLoopGroup(config.getBossLoopGroupThreads());
@@ -57,6 +75,9 @@ public class WebsocketServer {
                     @Override
                     protected void initChannel(NioSocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
+                        if (sslCtx != null) {
+                            pipeline.addFirst(sslCtx.newHandler(ch.alloc()));
+                        }
                         pipeline.addLast(new HttpServerCodec());
                         pipeline.addLast(new HttpObjectAggregator(65536));
                         pipeline.addLast(new HttpServerHandler(pojoEndpointServer, config, finalEventExecutorGroup));
@@ -84,7 +105,7 @@ public class WebsocketServer {
         }
 
         channelFuture.addListener(future -> {
-            if (!future.isSuccess()){
+            if (!future.isSuccess()) {
                 future.cause().printStackTrace();
             }
         });

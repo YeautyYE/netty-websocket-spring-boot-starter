@@ -239,13 +239,14 @@ src/
 
 #### 0.9.4
 
-- Bug fixed ：when there is no  `@BeforeHandshake` , `Session` in `OnOpen` is null.
+- Bug fixed ：when there is no  `@BeforeHandshake` , `Session` in `OnOpen` is null
 
 #### 0.9.5
 
-- Bug fixed ：`Throwable` in `OnError` event  is null.
+- Bug fixed ：`Throwable` in `OnError` event  is null
 
 #### 0.10.0
 
 - Modified the default value of `bossLoopGroupThreads` to 1
-- Supports configuring `useEventExecutorGroup` to run synchronous and time-consuming business logic in EventExecutorGroup, so that the I/O thread is not blocked by a time-consuming task.
+- Supports configuring `useEventExecutorGroup` to run synchronous and time-consuming business logic in EventExecutorGroup, so that the I/O thread is not blocked by a time-consuming task
+- SSL supported
