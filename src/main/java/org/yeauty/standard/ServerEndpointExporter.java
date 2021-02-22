@@ -18,6 +18,7 @@ import org.yeauty.exception.DeploymentException;
 import org.yeauty.pojo.PojoEndpointServer;
 import org.yeauty.pojo.PojoMethodMapping;
 
+import javax.net.ssl.SSLException;
 import java.net.InetSocketAddress;
 import java.util.*;
 
@@ -77,6 +78,9 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
                 logger.info(String.format("\033[34mNetty WebSocket started on port: %s with context path(s): %s .\033[0m", pojoEndpointServer.getPort(), stringJoiner.toString()));
             } catch (InterruptedException e) {
                 logger.error(String.format("websocket [%s] init fail", entry.getKey()), e);
+            } catch (SSLException e) {
+                logger.error(String.format("websocket [%s] ssl create fail", entry.getKey()), e);
+
             }
         }
     }
@@ -136,7 +140,34 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
 
         int maxFramePayloadLength = resolveAnnotationValue(annotation.maxFramePayloadLength(), Integer.class, "maxFramePayloadLength");
 
-        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, path, bossLoopGroupThreads, workerLoopGroupThreads, useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark, childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive, childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds, maxFramePayloadLength);
+        boolean useEventExecutorGroup = resolveAnnotationValue(annotation.useEventExecutorGroup(), Boolean.class, "useEventExecutorGroup");
+        int eventExecutorGroupThreads = resolveAnnotationValue(annotation.eventExecutorGroupThreads(), Integer.class, "eventExecutorGroupThreads");
+
+        String sslKeyPassword = resolveAnnotationValue(annotation.sslKeyPassword(), String.class, "sslKeyPassword");
+        String sslKeyStore = resolveAnnotationValue(annotation.sslKeyStore(), String.class, "sslKeyStore");
+        String sslKeyStorePassword = resolveAnnotationValue(annotation.sslKeyStorePassword(), String.class, "sslKeyStorePassword");
+        String sslKeyStoreType = resolveAnnotationValue(annotation.sslKeyStoreType(), String.class, "sslKeyStoreType");
+        String sslTrustStore = resolveAnnotationValue(annotation.sslTrustStore(), String.class, "sslTrustStore");
+        String sslTrustStorePassword = resolveAnnotationValue(annotation.sslTrustStorePassword(), String.class, "sslTrustStorePassword");
+        String sslTrustStoreType = resolveAnnotationValue(annotation.sslTrustStoreType(), String.class, "sslTrustStoreType");
+
+        String[] corsOrigins = annotation.corsOrigins();
+        if (corsOrigins.length != 0) {
+            for (int i = 0; i < corsOrigins.length; i++) {
+                corsOrigins[i] = resolveAnnotationValue(corsOrigins[i], String.class, "corsOrigins");
+            }
+        }
+        Boolean corsAllowCredentials = resolveAnnotationValue(annotation.corsAllowCredentials(), Boolean.class, "corsAllowCredentials");
+
+        ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, bossLoopGroupThreads, workerLoopGroupThreads
+                , useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark
+                , childOptionWriteBufferLowWaterMark, childOptionSoRcvbuf, childOptionSoSndbuf, childOptionTcpNodelay, childOptionSoKeepalive
+                , childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds
+                , maxFramePayloadLength, useEventExecutorGroup, eventExecutorGroupThreads
+                , sslKeyPassword, sslKeyStore, sslKeyStorePassword, sslKeyStoreType
+                , sslTrustStore, sslTrustStorePassword, sslTrustStoreType
+                , corsOrigins, corsAllowCredentials);
+
         return serverEndpointConfig;
     }
 

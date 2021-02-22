@@ -7,11 +7,21 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.cors.CorsConfig;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
+import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.springframework.util.StringUtils;
 import org.yeauty.pojo.PojoEndpointServer;
+import org.yeauty.util.SslUtils;
 
-import java.net.BindException;
+import javax.net.ssl.SSLException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -26,15 +36,34 @@ public class WebsocketServer {
 
     private final ServerEndpointConfig config;
 
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(WebsocketServer.class);
+
     public WebsocketServer(PojoEndpointServer webSocketServerHandler, ServerEndpointConfig serverEndpointConfig) {
         this.pojoEndpointServer = webSocketServerHandler;
         this.config = serverEndpointConfig;
+
     }
 
-    public void init() throws InterruptedException {
+    public void init() throws InterruptedException, SSLException {
+        EventExecutorGroup eventExecutorGroup = null;
+        final SslContext sslCtx;
+        if (!StringUtils.isEmpty(config.getKeyStore())) {
+            sslCtx = SslUtils.createSslContext(config.getKeyPassword(), config.getKeyStore(), config.getKeyStoreType(), config.getKeyStorePassword(), config.getTrustStore(), config.getTrustStoreType(), config.getTrustStorePassword());
+        } else {
+            sslCtx = null;
+        }
+        String[] corsOrigins = config.getCorsOrigins();
+        Boolean corsAllowCredentials = config.getCorsAllowCredentials();
+        final CorsConfig corsConfig = createCorsConfig(corsOrigins, corsAllowCredentials);
+
+        if (config.isUseEventExecutorGroup()) {
+            eventExecutorGroup = new DefaultEventExecutorGroup(config.getEventExecutorGroupThreads() == 0 ? 16 : config.getEventExecutorGroupThreads());
+        }
         EventLoopGroup boss = new NioEventLoopGroup(config.getBossLoopGroupThreads());
         EventLoopGroup worker = new NioEventLoopGroup(config.getWorkerLoopGroupThreads());
         ServerBootstrap bootstrap = new ServerBootstrap();
+        EventExecutorGroup finalEventExecutorGroup = eventExecutorGroup;
         bootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeoutMillis())
@@ -48,11 +77,17 @@ public class WebsocketServer {
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
-                    protected void initChannel(NioSocketChannel ch) throws Exception {
+                    protected void initChannel(NioSocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
+                        if (sslCtx != null) {
+                            pipeline.addFirst(sslCtx.newHandler(ch.alloc()));
+                        }
                         pipeline.addLast(new HttpServerCodec());
                         pipeline.addLast(new HttpObjectAggregator(65536));
-                        pipeline.addLast(new HttpServerHandler(pojoEndpointServer, config));
+                        if (corsConfig != null) {
+                            pipeline.addLast(new CorsHandler(corsConfig));
+                        }
+                        pipeline.addLast(new HttpServerHandler(pojoEndpointServer, config, finalEventExecutorGroup, corsConfig != null));
                     }
                 });
 
@@ -77,7 +112,7 @@ public class WebsocketServer {
         }
 
         channelFuture.addListener(future -> {
-            if (!future.isSuccess()){
+            if (!future.isSuccess()) {
                 future.cause().printStackTrace();
             }
         });
@@ -86,6 +121,27 @@ public class WebsocketServer {
             boss.shutdownGracefully().syncUninterruptibly();
             worker.shutdownGracefully().syncUninterruptibly();
         }));
+    }
+
+    private CorsConfig createCorsConfig(String[] corsOrigins, Boolean corsAllowCredentials) {
+        if (corsOrigins.length == 0) {
+            return null;
+        }
+        CorsConfigBuilder corsConfigBuilder = null;
+        for (String corsOrigin : corsOrigins) {
+            if ("*".equals(corsOrigin)) {
+                corsConfigBuilder = CorsConfigBuilder.forAnyOrigin();
+                break;
+            }
+        }
+        if (corsConfigBuilder == null) {
+            corsConfigBuilder = CorsConfigBuilder.forOrigins(corsOrigins);
+        }
+        if (corsAllowCredentials != null && corsAllowCredentials) {
+            corsConfigBuilder.allowCredentials();
+        }
+        corsConfigBuilder.allowNullOrigin();
+        return corsConfigBuilder.build();
     }
 
     public PojoEndpointServer getPojoEndpointServer() {

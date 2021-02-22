@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
@@ -13,6 +14,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.util.StringUtils;
 import org.yeauty.pojo.PojoEndpointServer;
@@ -30,6 +32,8 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private final PojoEndpointServer pojoEndpointServer;
     private final ServerEndpointConfig config;
+    private final EventExecutorGroup eventExecutorGroup;
+    private final boolean isCors;
 
     private static ByteBuf faviconByteBuf = null;
     private static ByteBuf notFoundByteBuf = null;
@@ -57,6 +61,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         }
     }
 
+
     private static ByteBuf buildStaticRes(String resPath) {
         try {
             InputStream inputStream = HttpServerHandler.class.getResourceAsStream(resPath);
@@ -73,9 +78,11 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         return null;
     }
 
-    public HttpServerHandler(PojoEndpointServer pojoEndpointServer, ServerEndpointConfig config) {
+    public HttpServerHandler(PojoEndpointServer pojoEndpointServer, ServerEndpointConfig config, EventExecutorGroup eventExecutorGroup, boolean isCors) {
         this.pojoEndpointServer = pojoEndpointServer;
         this.config = config;
+        this.eventExecutorGroup = eventExecutorGroup;
+        this.isCors = isCors;
     }
 
     @Override
@@ -228,10 +235,17 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 pipeline.addLast(new WebSocketServerCompressionHandler());
             }
             pipeline.addLast(new WebSocketFrameAggregator(Integer.MAX_VALUE));
-            pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
+            if (config.isUseEventExecutorGroup()) {
+                pipeline.addLast(eventExecutorGroup, new WebSocketServerHandler(pojoEndpointServer));
+            } else {
+                pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
+            }
             String finalPattern = pattern;
             handshaker.handshake(channel, req).addListener(future -> {
                 if (future.isSuccess()) {
+                    if (isCors) {
+                        pipeline.remove(CorsHandler.class);
+                    }
                     pojoEndpointServer.doOnOpen(channel, req, finalPattern);
                 } else {
                     handshaker.close(channel, new CloseWebSocketFrame());

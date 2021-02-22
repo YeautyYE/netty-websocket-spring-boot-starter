@@ -71,4 +71,41 @@ public @interface ServerEndpoint {
 
     String maxFramePayloadLength() default "65536";
 
+    //------------------------- eventExecutorGroup -------------------------
+
+    String useEventExecutorGroup() default "true"; //use EventExecutorGroup(another thread pool) to perform time-consuming synchronous business logic
+
+    String eventExecutorGroupThreads() default "16";
+
+    //------------------------- ssl (refer to spring Ssl) -------------------------
+
+    /**
+     * {@link org.springframework.boot.web.server.Ssl}
+     */
+
+    String sslKeyPassword() default "";
+
+    String sslKeyStore() default "";            //e.g. classpath:server.jks
+
+    String sslKeyStorePassword() default "";
+
+    String sslKeyStoreType() default "";        //e.g. JKS
+
+    String sslTrustStore() default "";
+
+    String sslTrustStorePassword() default "";
+
+    String sslTrustStoreType() default "";
+
+    //------------------------- cors (refer to spring CrossOrigin) -------------------------
+
+    /**
+     * {@link org.springframework.web.bind.annotation.CrossOrigin}
+     */
+
+    String[] corsOrigins() default {};
+
+    String corsAllowCredentials() default "";
+
+
 }

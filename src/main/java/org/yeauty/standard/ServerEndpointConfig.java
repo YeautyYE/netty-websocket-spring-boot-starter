@@ -5,8 +5,6 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Yeauty
@@ -16,7 +14,6 @@ public class ServerEndpointConfig {
 
     private final String HOST;
     private final int PORT;
-//    private final Set<String> PATH_SET;
     private final int BOSS_LOOP_GROUP_THREADS;
     private final int WORKER_LOOP_GROUP_THREADS;
     private final boolean USE_COMPRESSION_HANDLER;
@@ -35,17 +32,29 @@ public class ServerEndpointConfig {
     private final int WRITER_IDLE_TIME_SECONDS;
     private final int ALL_IDLE_TIME_SECONDS;
     private final int MAX_FRAME_PAYLOAD_LENGTH;
+    private final boolean USE_EVENT_EXECUTOR_GROUP;
+    private final int EVENT_EXECUTOR_GROUP_THREADS;
+
+    private final String KEY_PASSWORD;
+    private final String KEY_STORE;
+    private final String KEY_STORE_PASSWORD;
+    private final String KEY_STORE_TYPE;
+    private final String TRUST_STORE;
+    private final String TRUST_STORE_PASSWORD;
+    private final String TRUST_STORE_TYPE;
+
+    private final String[] CORS_ORIGINS;
+    private final Boolean CORS_ALLOW_CREDENTIALS;
+
     private static Integer randomPort;
 
-    public ServerEndpointConfig(String host, int port, String path, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds, int maxFramePayloadLength) {
+    public ServerEndpointConfig(String host, int port, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds, int maxFramePayloadLength, boolean useEventExecutorGroup, int eventExecutorGroupThreads, String keyPassword, String keyStore, String keyStorePassword, String keyStoreType, String trustStore, String trustStorePassword, String trustStoreType, String[] corsOrigins, Boolean corsAllowCredentials) {
         if (StringUtils.isEmpty(host) || "0.0.0.0".equals(host) || "0.0.0.0/0.0.0.0".equals(host)) {
             this.HOST = "0.0.0.0";
         } else {
             this.HOST = host;
         }
         this.PORT = getAvailablePort(port);
-//        PATH_SET = new HashSet<>();
-//        addPath(path);
         this.BOSS_LOOP_GROUP_THREADS = bossLoopGroupThreads;
         this.WORKER_LOOP_GROUP_THREADS = workerLoopGroupThreads;
         this.USE_COMPRESSION_HANDLER = useCompressionHandler;
@@ -64,19 +73,20 @@ public class ServerEndpointConfig {
         this.WRITER_IDLE_TIME_SECONDS = writerIdleTimeSeconds;
         this.ALL_IDLE_TIME_SECONDS = allIdleTimeSeconds;
         this.MAX_FRAME_PAYLOAD_LENGTH = maxFramePayloadLength;
+        this.USE_EVENT_EXECUTOR_GROUP = useEventExecutorGroup;
+        this.EVENT_EXECUTOR_GROUP_THREADS = eventExecutorGroupThreads;
+
+        this.KEY_PASSWORD = keyPassword;
+        this.KEY_STORE = keyStore;
+        this.KEY_STORE_PASSWORD = keyStorePassword;
+        this.KEY_STORE_TYPE = keyStoreType;
+        this.TRUST_STORE = trustStore;
+        this.TRUST_STORE_PASSWORD = trustStorePassword;
+        this.TRUST_STORE_TYPE = trustStoreType;
+
+        this.CORS_ORIGINS = corsOrigins;
+        this.CORS_ALLOW_CREDENTIALS = corsAllowCredentials;
     }
-
-
-    /*public String addPath(String path) {
-        if (StringUtils.isEmpty(path)) {
-            path = "/";
-        }
-        if (PATH_SET.contains(path)) {
-            throw new RuntimeException("ServerEndpointConfig.addPath  path:" + path + " are repeat.");
-        }
-        this.PATH_SET.add(path);
-        return path;
-    }*/
 
     private int getAvailablePort(int port) {
         if (port != 0) {
@@ -189,5 +199,49 @@ public class ServerEndpointConfig {
 
     public int getmaxFramePayloadLength() {
         return MAX_FRAME_PAYLOAD_LENGTH;
+    }
+
+    public boolean isUseEventExecutorGroup() {
+        return USE_EVENT_EXECUTOR_GROUP;
+    }
+
+    public int getEventExecutorGroupThreads() {
+        return EVENT_EXECUTOR_GROUP_THREADS;
+    }
+
+    public String getKeyPassword() {
+        return KEY_PASSWORD;
+    }
+
+    public String getKeyStore() {
+        return KEY_STORE;
+    }
+
+    public String getKeyStorePassword() {
+        return KEY_STORE_PASSWORD;
+    }
+
+    public String getKeyStoreType() {
+        return KEY_STORE_TYPE;
+    }
+
+    public String getTrustStore() {
+        return TRUST_STORE;
+    }
+
+    public String getTrustStorePassword() {
+        return TRUST_STORE_PASSWORD;
+    }
+
+    public String getTrustStoreType() {
+        return TRUST_STORE_TYPE;
+    }
+
+    public String[] getCorsOrigins() {
+        return CORS_ORIGINS;
+    }
+
+    public Boolean getCorsAllowCredentials() {
+        return CORS_ALLOW_CREDENTIALS;
     }
 }

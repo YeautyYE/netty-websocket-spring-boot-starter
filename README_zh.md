@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.5</version>
+		<version>0.10.0</version>
 	</dependency>
 ```
 
@@ -153,6 +153,17 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|与`IdleStateHandler`中的`writerIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |allIdleTimeSeconds|0|与`IdleStateHandler`中的`allIdleTimeSeconds`一致，并且当它不为0时，将在`pipeline`中添加`IdleStateHandler`
 |maxFramePayloadLength|65536|最大允许帧载荷长度
+|useEventExecutorGroup|true|是否使用另一个线程池来执行耗时的同步业务逻辑
+|eventExecutorGroupThreads|16|eventExecutorGroup的线程数
+|sslKeyPassword|""(即未设置)|与Spring的`server.ssl.key-password`一致
+|sslKeyStore|""(即未设置)|与Spring的`server.ssl.key-store`一致
+|sslKeyStorePassword|""(即未设置)|与Spring的`server.ssl.key-store-password`一致
+|sslKeyStoreType|""(即未设置)|与Spring的`server.ssl.key-store-type`一致
+|sslTrustStore|""(即未设置)|与Spring的`server.ssl.trust-store`一致
+|sslTrustStorePassword|""(即未设置)|与Spring的`server.ssl.trust-store-password`一致
+|sslTrustStoreType|""(即未设置)|与Spring的`server.ssl.trust-store-type`一致
+|corsOrigins|{}(即未设置)|与Spring的`@CrossOrigin#origins`一致
+|corsAllowCredentials|""(即未设置)|与Spring的`@CrossOrigin#allowCredentials`一致
 
 ### 通过application.properties进行配置
 > 所有参数皆可使用`${...}`占位符获取`application.properties`中的配置。如下：
@@ -241,3 +252,11 @@ src/
 #### 0.9.5
 
 - 修复bug：`OnError`事件中的`Throwable`为null.
+
+#### 0.10.0
+
+- 修改`bossLoopGroupThreads`默认值为1
+- 支持通过配置`useEventExecutorGroup`让同步且耗时的业务逻辑在EventExecutorGroup中执行，防止I/O线程被耗时的任务阻塞
+- 支持SSL
+- 支持跨域
+- 更新`Netty`版本到 `4.1.59.Final`

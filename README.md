@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.9.5</version>
+		<version>0.10.0</version>
 	</dependency>
 ```
 
@@ -153,6 +153,17 @@ public class MyWebSocket {
 |writerIdleTimeSeconds|0|the same as `writerIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |allIdleTimeSeconds|0|the same as `allIdleTimeSeconds` in `IdleStateHandler` and add `IdleStateHandler` to `pipeline` when it is not 0
 |maxFramePayloadLength|65536|Maximum allowable frame payload length.
+|useEventExecutorGroup|true|Whether to use another thread pool to perform time-consuming synchronous business logic
+|eventExecutorGroupThreads|16|num of threads in bossEventLoopGroup
+|sslKeyPassword|""(mean not set)|the same as `server.ssl.key-password` in Spring
+|sslKeyStore|""(mean not set)|the same as `server.ssl.key-store` in Spring
+|sslKeyStorePassword|""(mean not set)|the same as `server.ssl.key-store-password` in Spring
+|sslKeyStoreType|""(mean not set)|the same as `server.ssl.key-store-type` in Spring
+|sslTrustStore|""(mean not set)|the same as `server.ssl.trust-store` in Spring
+|sslTrustStorePassword|""(mean not set)|the same as `server.ssl.trust-store-password` in Spring
+|sslTrustStoreType|""(mean not set)|the same as `server.ssl.trust-store-type` in Spring
+|corsOrigins|{}(mean not set)|the same as `@CrossOrigin#origins` in Spring
+|corsAllowCredentials|""(mean not set)|the same as `@CrossOrigin#allowCredentials` in Spring
 
 ### Configuration by application.properties
 > You can get the configurate of `application.properties` by using `${...}` placeholders. for example：
@@ -237,8 +248,17 @@ src/
 
 #### 0.9.4
 
-- Bug fixed ：when there is no  `@BeforeHandshake` , `Session` in `OnOpen` is null.
+- Bug fixed ：when there is no  `@BeforeHandshake` , `Session` in `OnOpen` is null
 
 #### 0.9.5
 
-- Bug fixed ：`Throwable` in `OnError` event  is null.
+- Bug fixed ：`Throwable` in `OnError` event  is null
+
+#### 0.10.0
+
+- Modified the default value of `bossLoopGroupThreads` to 1
+- Supports configuring `useEventExecutorGroup` to run synchronous and time-consuming business logic in EventExecutorGroup, so that the I/O thread is not blocked by a time-consuming task
+- SSL supported
+- CORS supported
+- Update `Netty` version to `4.1.49.Final`
+
