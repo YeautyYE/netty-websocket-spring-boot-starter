@@ -260,3 +260,5 @@ src/
 - Supports configuring `useEventExecutorGroup` to run synchronous and time-consuming business logic in EventExecutorGroup, so that the I/O thread is not blocked by a time-consuming task
 - SSL supported
 - CORS supported
+- Update `Netty` version to `4.1.49.Final`
+

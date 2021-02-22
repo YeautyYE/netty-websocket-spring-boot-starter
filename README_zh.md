@@ -259,3 +259,4 @@ src/
 - 支持通过配置`useEventExecutorGroup`让同步且耗时的业务逻辑在EventExecutorGroup中执行，防止I/O线程被耗时的任务阻塞
 - 支持SSL
 - 支持跨域
+- 更新`Netty`版本到 `4.1.59.Final`
