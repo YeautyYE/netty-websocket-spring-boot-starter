@@ -5,8 +5,6 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Yeauty
@@ -16,7 +14,6 @@ public class ServerEndpointConfig {
 
     private final String HOST;
     private final int PORT;
-    //    private final Set<String> PATH_SET;
     private final int BOSS_LOOP_GROUP_THREADS;
     private final int WORKER_LOOP_GROUP_THREADS;
     private final boolean USE_COMPRESSION_HANDLER;
@@ -46,9 +43,12 @@ public class ServerEndpointConfig {
     private final String TRUST_STORE_PASSWORD;
     private final String TRUST_STORE_TYPE;
 
+    private final String[] CORS_ORIGINS;
+    private final Boolean CORS_ALLOW_CREDENTIALS;
+
     private static Integer randomPort;
 
-    public ServerEndpointConfig(String host, int port, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds, int maxFramePayloadLength, boolean useEventExecutorGroup, int eventExecutorGroupThreads, String keyPassword, String keyStore, String keyStorePassword, String keyStoreType, String trustStore, String trustStorePassword, String trustStoreType) {
+    public ServerEndpointConfig(String host, int port, int bossLoopGroupThreads, int workerLoopGroupThreads, boolean useCompressionHandler, int connectTimeoutMillis, int soBacklog, int writeSpinCount, int writeBufferHighWaterMark, int writeBufferLowWaterMark, int soRcvbuf, int soSndbuf, boolean tcpNodelay, boolean soKeepalive, int soLinger, boolean allowHalfClosure, int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds, int maxFramePayloadLength, boolean useEventExecutorGroup, int eventExecutorGroupThreads, String keyPassword, String keyStore, String keyStorePassword, String keyStoreType, String trustStore, String trustStorePassword, String trustStoreType, String[] corsOrigins, Boolean corsAllowCredentials) {
         if (StringUtils.isEmpty(host) || "0.0.0.0".equals(host) || "0.0.0.0/0.0.0.0".equals(host)) {
             this.HOST = "0.0.0.0";
         } else {
@@ -83,6 +83,9 @@ public class ServerEndpointConfig {
         this.TRUST_STORE = trustStore;
         this.TRUST_STORE_PASSWORD = trustStorePassword;
         this.TRUST_STORE_TYPE = trustStoreType;
+
+        this.CORS_ORIGINS = corsOrigins;
+        this.CORS_ALLOW_CREDENTIALS = corsAllowCredentials;
     }
 
     private int getAvailablePort(int port) {
@@ -232,5 +235,13 @@ public class ServerEndpointConfig {
 
     public String getTrustStoreType() {
         return TRUST_STORE_TYPE;
+    }
+
+    public String[] getCorsOrigins() {
+        return CORS_ORIGINS;
+    }
+
+    public Boolean getCorsAllowCredentials() {
+        return CORS_ALLOW_CREDENTIALS;
     }
 }

@@ -151,6 +151,13 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         String sslTrustStorePassword = resolveAnnotationValue(annotation.sslTrustStorePassword(), String.class, "sslTrustStorePassword");
         String sslTrustStoreType = resolveAnnotationValue(annotation.sslTrustStoreType(), String.class, "sslTrustStoreType");
 
+        String[] corsOrigins = annotation.corsOrigins();
+        if (corsOrigins.length != 0) {
+            for (int i = 0; i < corsOrigins.length; i++) {
+                corsOrigins[i] = resolveAnnotationValue(corsOrigins[i], String.class, "corsOrigins");
+            }
+        }
+        Boolean corsAllowCredentials = resolveAnnotationValue(annotation.corsAllowCredentials(), Boolean.class, "corsAllowCredentials");
 
         ServerEndpointConfig serverEndpointConfig = new ServerEndpointConfig(host, port, bossLoopGroupThreads, workerLoopGroupThreads
                 , useCompressionHandler, optionConnectTimeoutMillis, optionSoBacklog, childOptionWriteSpinCount, childOptionWriteBufferHighWaterMark
@@ -158,7 +165,8 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
                 , childOptionSoLinger, childOptionAllowHalfClosure, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds
                 , maxFramePayloadLength, useEventExecutorGroup, eventExecutorGroupThreads
                 , sslKeyPassword, sslKeyStore, sslKeyStorePassword, sslKeyStoreType
-                , sslTrustStore, sslTrustStorePassword, sslTrustStoreType);
+                , sslTrustStore, sslTrustStorePassword, sslTrustStoreType
+                , corsOrigins, corsAllowCredentials);
 
         return serverEndpointConfig;
     }

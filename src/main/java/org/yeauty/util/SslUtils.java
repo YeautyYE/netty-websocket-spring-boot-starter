@@ -3,6 +3,7 @@ package org.yeauty.util;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLException;
@@ -27,9 +28,9 @@ public final class SslUtils {
             KeyStore keyStore = loadKeyStore(type, resource, keyStorePassword);
             KeyManagerFactory keyManagerFactory = KeyManagerFactory
                     .getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            char[] keyPasswordBytes = (keyPassword != null
+            char[] keyPasswordBytes = (!StringUtils.isEmpty(keyPassword)
                     ? keyPassword.toCharArray() : null);
-            if (keyPasswordBytes == null && keyStorePassword != null) {
+            if (keyPasswordBytes == null && !StringUtils.isEmpty(keyStorePassword)) {
                 keyPasswordBytes = keyStorePassword.toCharArray();
             }
             keyManagerFactory.init(keyStore, keyPasswordBytes);
@@ -53,13 +54,13 @@ public final class SslUtils {
 
     private static KeyStore loadKeyStore(String type, String resource, String password)
             throws Exception {
-        type = (type == null ? "JKS" : type);
-        if (resource == null) {
+        type = (StringUtils.isEmpty(type) ? "JKS" : type);
+        if (StringUtils.isEmpty(resource)) {
             return null;
         }
         KeyStore store = KeyStore.getInstance(type);
         URL url = ResourceUtils.getURL(resource);
-        store.load(url.openStream(), password == null ? null : password.toCharArray());
+        store.load(url.openStream(), StringUtils.isEmpty(password) ? null : password.toCharArray());
         return store;
     }
 }

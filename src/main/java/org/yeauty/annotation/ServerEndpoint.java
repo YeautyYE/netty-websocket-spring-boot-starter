@@ -77,7 +77,11 @@ public @interface ServerEndpoint {
 
     String eventExecutorGroupThreads() default "16";
 
-    //------------------------- ssl (refer to spring) -------------------------
+    //------------------------- ssl (refer to spring Ssl) -------------------------
+
+    /**
+     * {@link org.springframework.boot.web.server.Ssl}
+     */
 
     String sslKeyPassword() default "";
 
@@ -92,5 +96,16 @@ public @interface ServerEndpoint {
     String sslTrustStorePassword() default "";
 
     String sslTrustStoreType() default "";
+
+    //------------------------- cors (refer to spring CrossOrigin) -------------------------
+
+    /**
+     * {@link org.springframework.web.bind.annotation.CrossOrigin}
+     */
+
+    String[] corsOrigins() default {};
+
+    String corsAllowCredentials() default "";
+
 
 }

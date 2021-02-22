@@ -155,6 +155,15 @@ public class MyWebSocket {
 |maxFramePayloadLength|65536|Maximum allowable frame payload length.
 |useEventExecutorGroup|true|Whether to use another thread pool to perform time-consuming synchronous business logic
 |eventExecutorGroupThreads|16|num of threads in bossEventLoopGroup
+|sslKeyPassword|""(mean not set)|the same as `server.ssl.key-password` in Spring
+|sslKeyStore|""(mean not set)|the same as `server.ssl.key-store` in Spring
+|sslKeyStorePassword|""(mean not set)|the same as `server.ssl.key-store-password` in Spring
+|sslKeyStoreType|""(mean not set)|the same as `server.ssl.key-store-type` in Spring
+|sslTrustStore|""(mean not set)|the same as `server.ssl.trust-store` in Spring
+|sslTrustStorePassword|""(mean not set)|the same as `server.ssl.trust-store-password` in Spring
+|sslTrustStoreType|""(mean not set)|the same as `server.ssl.trust-store-type` in Spring
+|corsOrigins|{}(mean not set)|the same as `@CrossOrigin#origins` in Spring
+|corsAllowCredentials|""(mean not set)|the same as `@CrossOrigin#allowCredentials` in Spring
 
 ### Configuration by application.properties
 > You can get the configurate of `application.properties` by using `${...}` placeholders. for example：
@@ -250,3 +259,4 @@ src/
 - Modified the default value of `bossLoopGroupThreads` to 1
 - Supports configuring `useEventExecutorGroup` to run synchronous and time-consuming business logic in EventExecutorGroup, so that the I/O thread is not blocked by a time-consuming task
 - SSL supported
+- CORS supported
