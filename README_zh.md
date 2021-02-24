@@ -155,15 +155,15 @@ public class MyWebSocket {
 |maxFramePayloadLength|65536|最大允许帧载荷长度
 |useEventExecutorGroup|true|是否使用另一个线程池来执行耗时的同步业务逻辑
 |eventExecutorGroupThreads|16|eventExecutorGroup的线程数
-|sslKeyPassword|""(即未设置)|与Spring的`server.ssl.key-password`一致
-|sslKeyStore|""(即未设置)|与Spring的`server.ssl.key-store`一致
-|sslKeyStorePassword|""(即未设置)|与Spring的`server.ssl.key-store-password`一致
-|sslKeyStoreType|""(即未设置)|与Spring的`server.ssl.key-store-type`一致
-|sslTrustStore|""(即未设置)|与Spring的`server.ssl.trust-store`一致
-|sslTrustStorePassword|""(即未设置)|与Spring的`server.ssl.trust-store-password`一致
-|sslTrustStoreType|""(即未设置)|与Spring的`server.ssl.trust-store-type`一致
-|corsOrigins|{}(即未设置)|与Spring的`@CrossOrigin#origins`一致
-|corsAllowCredentials|""(即未设置)|与Spring的`@CrossOrigin#allowCredentials`一致
+|sslKeyPassword|""(即未设置)|与spring-boot的`server.ssl.key-password`一致
+|sslKeyStore|""(即未设置)|与spring-boot的`server.ssl.key-store`一致
+|sslKeyStorePassword|""(即未设置)|与spring-boot的`server.ssl.key-store-password`一致
+|sslKeyStoreType|""(即未设置)|与spring-boot的`server.ssl.key-store-type`一致
+|sslTrustStore|""(即未设置)|与spring-boot的`server.ssl.trust-store`一致
+|sslTrustStorePassword|""(即未设置)|与spring-boot的`server.ssl.trust-store-password`一致
+|sslTrustStoreType|""(即未设置)|与spring-boot的`server.ssl.trust-store-type`一致
+|corsOrigins|{}(即未设置)|与spring-boot的`@CrossOrigin#origins`一致
+|corsAllowCredentials|""(即未设置)|与spring-boot的`@CrossOrigin#allowCredentials`一致
 
 ### 通过application.properties进行配置
 > 所有参数皆可使用`${...}`占位符获取`application.properties`中的配置。如下：

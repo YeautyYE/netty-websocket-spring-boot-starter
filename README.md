@@ -155,15 +155,15 @@ public class MyWebSocket {
 |maxFramePayloadLength|65536|Maximum allowable frame payload length.
 |useEventExecutorGroup|true|Whether to use another thread pool to perform time-consuming synchronous business logic
 |eventExecutorGroupThreads|16|num of threads in bossEventLoopGroup
-|sslKeyPassword|""(mean not set)|the same as `server.ssl.key-password` in Spring
-|sslKeyStore|""(mean not set)|the same as `server.ssl.key-store` in Spring
-|sslKeyStorePassword|""(mean not set)|the same as `server.ssl.key-store-password` in Spring
-|sslKeyStoreType|""(mean not set)|the same as `server.ssl.key-store-type` in Spring
-|sslTrustStore|""(mean not set)|the same as `server.ssl.trust-store` in Spring
-|sslTrustStorePassword|""(mean not set)|the same as `server.ssl.trust-store-password` in Spring
-|sslTrustStoreType|""(mean not set)|the same as `server.ssl.trust-store-type` in Spring
-|corsOrigins|{}(mean not set)|the same as `@CrossOrigin#origins` in Spring
-|corsAllowCredentials|""(mean not set)|the same as `@CrossOrigin#allowCredentials` in Spring
+|sslKeyPassword|""(mean not set)|the same as `server.ssl.key-password` in spring-boot
+|sslKeyStore|""(mean not set)|the same as `server.ssl.key-store` in spring-boot
+|sslKeyStorePassword|""(mean not set)|the same as `server.ssl.key-store-password` in spring-boot
+|sslKeyStoreType|""(mean not set)|the same as `server.ssl.key-store-type` in spring-boot
+|sslTrustStore|""(mean not set)|the same as `server.ssl.trust-store` in spring-boot
+|sslTrustStorePassword|""(mean not set)|the same as `server.ssl.trust-store-password` in spring-boot
+|sslTrustStoreType|""(mean not set)|the same as `server.ssl.trust-store-type` in spring-boot
+|corsOrigins|{}(mean not set)|the same as `@CrossOrigin#origins` in spring-boot
+|corsAllowCredentials|""(mean not set)|the same as `@CrossOrigin#allowCredentials` in spring-boot
 
 ### Configuration by application.properties
 > You can get the configurate of `application.properties` by using `${...}` placeholders. for example：
