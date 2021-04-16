@@ -262,3 +262,6 @@ src/
 - CORS supported
 - Update `Netty` version to `4.1.49.Final`
 
+#### 0.11.0
+
+- When the `ServerEndpoint` class is proxied by CGLIB (as with AOP enhancement), it still works

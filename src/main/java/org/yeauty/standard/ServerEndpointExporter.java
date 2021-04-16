@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.util.ClassUtils;
 import org.yeauty.annotation.ServerEndpoint;
 import org.yeauty.exception.DeploymentException;
 import org.yeauty.pojo.PojoEndpointServer;
@@ -61,7 +62,11 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         }
 
         for (Class<?> endpointClass : endpointClasses) {
-            registerEndpoint(endpointClass);
+            if (ClassUtils.isCglibProxyClass(endpointClass)){
+                registerEndpoint(endpointClass.getSuperclass());
+            }else {
+                registerEndpoint(endpointClass);
+            }
         }
 
         init();

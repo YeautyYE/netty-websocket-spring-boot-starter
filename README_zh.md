@@ -260,3 +260,7 @@ src/
 - 支持SSL
 - 支持跨域
 - 更新`Netty`版本到 `4.1.59.Final`
+
+#### 0.11.0
+
+- 当`ServerEndpoint`类被cglib代理时(如aop增强)，仍能正常运行
