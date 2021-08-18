@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.11.0</version>
+		<version>0.12.0</version>
 	</dependency>
 ```
 
@@ -265,3 +265,9 @@ src/
 #### 0.11.0
 
 - When the `ServerEndpoint` class is proxied by CGLIB (as with AOP enhancement), it still works
+
+#### 0.12.0
+
+- `@enableWebSocket` adds the `scanBasePackages` attribute
+- `@serverEndpoint` no longer depends on `@Component`
+- Update `Netty` version to `4.1.67.Final`

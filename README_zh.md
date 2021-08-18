@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.11.0</version>
+		<version>0.12.0</version>
 	</dependency>
 ```
 
@@ -264,3 +264,9 @@ src/
 #### 0.11.0
 
 - 当`ServerEndpoint`类被cglib代理时(如aop增强)，仍能正常运行
+
+#### 0.12.0
+
+- `@EnableWebSocket`增加`scanBasePackages`属性
+- `@ServerEndpoint`不再依赖`@Component`
+- 更新`Netty`版本到 `4.1.67.Final`
