@@ -9,11 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
+import org.yeauty.annotation.EnableWebSocket;
 import org.yeauty.annotation.ServerEndpoint;
 import org.yeauty.exception.DeploymentException;
 import org.yeauty.pojo.PojoEndpointServer;
@@ -25,14 +31,15 @@ import java.util.*;
 
 /**
  * @author Yeauty
- * @version 1.0
  */
-public class ServerEndpointExporter extends ApplicationObjectSupport implements SmartInitializingSingleton, BeanFactoryAware {
+public class ServerEndpointExporter extends ApplicationObjectSupport implements SmartInitializingSingleton, BeanFactoryAware, ResourceLoaderAware {
 
     @Autowired
     Environment environment;
 
     private AbstractBeanFactory beanFactory;
+
+    private ResourceLoader resourceLoader;
 
     private final Map<InetSocketAddress, WebsocketServer> addressWebsocketServerMap = new HashMap<>();
 
@@ -51,25 +58,66 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
     }
 
     protected void registerEndpoints() {
-        Set<Class<?>> endpointClasses = new LinkedHashSet<>();
-
         ApplicationContext context = getApplicationContext();
-        if (context != null) {
-            String[] endpointBeanNames = context.getBeanNamesForAnnotation(ServerEndpoint.class);
-            for (String beanName : endpointBeanNames) {
-                endpointClasses.add(context.getType(beanName));
-            }
+
+        scanPackage(context);
+
+        String[] endpointBeanNames = context.getBeanNamesForAnnotation(ServerEndpoint.class);
+        Set<Class<?>> endpointClasses = new LinkedHashSet<>();
+        for (String beanName : endpointBeanNames) {
+            endpointClasses.add(context.getType(beanName));
         }
 
         for (Class<?> endpointClass : endpointClasses) {
-            if (ClassUtils.isCglibProxyClass(endpointClass)){
+            if (ClassUtils.isCglibProxyClass(endpointClass)) {
                 registerEndpoint(endpointClass.getSuperclass());
-            }else {
+            } else {
                 registerEndpoint(endpointClass);
             }
         }
 
         init();
+    }
+
+    private void scanPackage(ApplicationContext context) {
+        String[] basePackages = null;
+
+        String[] enableWebSocketBeanNames = context.getBeanNamesForAnnotation(EnableWebSocket.class);
+        if (enableWebSocketBeanNames.length != 0) {
+            for (String enableWebSocketBeanName : enableWebSocketBeanNames) {
+                Object enableWebSocketBean = context.getBean(enableWebSocketBeanName);
+                EnableWebSocket enableWebSocket = AnnotationUtils.findAnnotation(enableWebSocketBean.getClass(), EnableWebSocket.class);
+                assert enableWebSocket != null;
+                if (enableWebSocket.scanBasePackages().length != 0) {
+                    basePackages = enableWebSocket.scanBasePackages();
+                    break;
+                }
+            }
+        }
+
+        // use @SpringBootApplication package
+        if (basePackages == null) {
+            String[] springBootApplicationBeanName = context.getBeanNamesForAnnotation(SpringBootApplication.class);
+            Object springBootApplicationBean = context.getBean(springBootApplicationBeanName[0]);
+            SpringBootApplication springBootApplication = AnnotationUtils.findAnnotation(springBootApplicationBean.getClass(), SpringBootApplication.class);
+            assert springBootApplication != null;
+            if (springBootApplication.scanBasePackages().length != 0) {
+                basePackages = springBootApplication.scanBasePackages();
+            } else {
+                String packageName = ClassUtils.getPackageName(springBootApplicationBean.getClass().getName());
+                basePackages = new String[1];
+                basePackages[0] = packageName;
+            }
+        }
+
+        EndpointClassPathScanner scanHandle = new EndpointClassPathScanner((BeanDefinitionRegistry) context, false);
+        if (resourceLoader != null) {
+            scanHandle.setResourceLoader(resourceLoader);
+        }
+
+        for (String basePackage : basePackages) {
+            scanHandle.doScan(basePackage);
+        }
     }
 
     private void init() {
@@ -198,4 +246,8 @@ public class ServerEndpointExporter extends ApplicationObjectSupport implements 
         }
     }
 
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 }

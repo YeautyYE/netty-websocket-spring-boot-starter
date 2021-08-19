@@ -11,4 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Import(NettyWebSocketSelector.class)
 public @interface EnableWebSocket {
+
+    String[] scanBasePackages() default {};
+
 }
