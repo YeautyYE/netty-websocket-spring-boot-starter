@@ -241,7 +241,15 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 pipeline.addLast(new WebSocketServerHandler(pojoEndpointServer));
             }
             String finalPattern = pattern;
-            handshaker.handshake(channel, req).addListener(future -> {
+
+            String header = headers.get(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
+            HttpHeaders httpHeaders = null;
+            if (header!=null) {
+                httpHeaders = new DefaultHttpHeaders().add(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, header);
+            }
+            final ChannelFuture handshakeFuture = handshaker.handshake(ctx.channel(), req,httpHeaders,ctx.channel().newPromise());
+
+            handshakeFuture.addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     if (isCors) {
                         pipeline.remove(CorsHandler.class);
