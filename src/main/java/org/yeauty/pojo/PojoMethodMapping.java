@@ -334,10 +334,32 @@ public class PojoMethodMapping {
                 }
             }
             if (methodArgumentResolvers[i] == null) {
-                throw new DeploymentException("pojoMethodMapping.paramClassIncorrect parameter name : " + parameter.getParameterName());
+                methodArgumentResolvers[i] = getCustomizeResolver(parameter);
+                if (methodArgumentResolvers[i] == null ){
+                    throw new DeploymentException("pojoMethodMapping.paramClassIncorrect parameter name : " + parameter.getParameterName());
+                }
             }
         }
         return methodArgumentResolvers;
+    }
+
+    private MethodArgumentResolver getCustomizeResolver(MethodParameter parameter) throws DeploymentException {
+        try {
+            if (parameter.getMethod().isAnnotationPresent(OnMessage.class)) {
+                OnMessage annotation = parameter.getMethod().getAnnotation(OnMessage.class);
+                if (annotation.addResolver().length != 0) {
+                    for (Class<? extends MethodArgumentResolver> aClass : annotation.addResolver()) {
+                        MethodArgumentResolver resolver = aClass.getDeclaredConstructor().newInstance();
+                        if (resolver.supportsParameter(parameter)){
+                            return resolver;
+                        }
+                    }
+                }
+            }
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+            throw new DeploymentException("org.yeauty.pojo.PojoMethodMapping.getCustomizeResolver:could not init MethodArgumentResolver");
+        }
+        return null;
     }
 
     private List<MethodArgumentResolver> getDefaultResolvers() {
