@@ -36,8 +36,8 @@
     </scm>
 
     <properties>
-        <netty.version>4.1.67.Final</netty.version>
-        <spring-boot.version>2.0.0.RELEASE</spring-boot.version>
+        <netty.version>4.1.101.Final</netty.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
     </properties>
 
     <dependencies>
