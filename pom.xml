@@ -6,7 +6,7 @@
 
     <groupId>org.yeauty</groupId>
     <artifactId>netty-websocket-spring-boot-starter</artifactId>
-    <version>0.12.0</version>
+    <version>0.13.0</version>
 
     <name>netty-websocket-spring-boot-starter</name>
     <description>
@@ -37,7 +37,7 @@
 
     <properties>
         <netty.version>4.1.67.Final</netty.version>
-        <spring-boot.version>2.0.0.RELEASE</spring-boot.version>
+        <spring-boot.version>3.3.5</spring-boot.version>
     </properties>
 
     <dependencies>
