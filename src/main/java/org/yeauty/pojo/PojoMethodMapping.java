@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -246,8 +247,8 @@ public class PojoMethodMapping {
 
     Object getEndpointInstance() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Object implement = pojoClazz.getDeclaredConstructor().newInstance();
-        AutowiredAnnotationBeanPostProcessor postProcessor = applicationContext.getBean(AutowiredAnnotationBeanPostProcessor.class);
-        postProcessor.postProcessPropertyValues(null, null, implement, null);
+        AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+        beanFactory.autowireBean(implement);
         return implement;
     }
 
