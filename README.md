@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter will help you develop WebSocket server by us
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.12.0</version>
+		<version>0.13.0</version>
 	</dependency>
 ```
 
@@ -271,3 +271,11 @@ src/
 - `@enableWebSocket` adds the `scanBasePackages` attribute
 - `@serverEndpoint` no longer depends on `@Component`
 - Update `Netty` version to `4.1.67.Final`
+
+#### 0.13.0
+
+- Fixed the issue where WebSocket compression was not working.
+- Upgraded support for Spring Boot 3.
+- Included the client's `Sec-WebSocket-Protocol` in the response header.
+- When closing the connection, sends a `bye` command first instead of directly closing.
+- Updated `Netty` version to `4.1.118.Final`.

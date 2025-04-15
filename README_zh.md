@@ -18,7 +18,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 	<dependency>
 		<groupId>org.yeauty</groupId>
 		<artifactId>netty-websocket-spring-boot-starter</artifactId>
-		<version>0.12.0</version>
+		<version>0.13.0</version>
 	</dependency>
 ```
 
@@ -270,3 +270,11 @@ src/
 - `@EnableWebSocket`增加`scanBasePackages`属性
 - `@ServerEndpoint`不再依赖`@Component`
 - 更新`Netty`版本到 `4.1.67.Final`
+
+#### 0.13.0
+
+- 修复了无法进行WebSocket压缩的问题
+- 升级支持spring-boot3
+- 响应头带上前端的`Sec-WebSocket-Protocol`
+- 关闭连接时，会先发送`bye`命令，而不是直接close
+- 更新`Netty`版本到 `4.1.118.Final`
