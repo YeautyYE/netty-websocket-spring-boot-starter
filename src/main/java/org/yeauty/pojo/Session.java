@@ -6,7 +6,9 @@ import io.netty.channel.*;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.util.AttributeKey;
 
 import java.net.InetSocketAddress;
@@ -225,6 +227,7 @@ public class Session {
     }
 
     public ChannelFuture close(ChannelPromise promise) {
+        channel.writeAndFlush(new CloseWebSocketFrame(WebSocketCloseStatus.NORMAL_CLOSURE));
         return channel.close(promise);
     }
 
