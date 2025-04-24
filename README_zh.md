@@ -7,7 +7,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 本项目帮助你在spring-boot中使用Netty来开发WebSocket服务器，并像spring-websocket的注解开发一样简单
 
 ### 要求
-- jdk版本为1.8或1.8+
+- jdk版本为17
 
 
 ### 快速开始

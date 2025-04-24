@@ -7,7 +7,7 @@ netty-websocket-spring-boot-starter [![License](http://img.shields.io/:license-a
 netty-websocket-spring-boot-starter will help you develop WebSocket server by using Netty in spring-boot,it is easy to develop by using annotation like spring-websocket 
 
 ### Requirement
-- jdk version 1.8 or 1.8+
+- jdk version 17
 
 
 ### Quick Start
